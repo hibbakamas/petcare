@@ -1,1 +1,1 @@
-# petcare
+# Main project overview, setup instructions
