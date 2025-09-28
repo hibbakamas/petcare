@@ -1,1 +1,7 @@
-# SQLAlchemy engine/session helpers
+# DB connection and migration
+
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+db = SQLAlchemy()
+migrate = Migrate()

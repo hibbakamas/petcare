@@ -1,1 +1,7 @@
-# Python dependencies (Flask, SQLAlchemy, mysqlclient)
+# python dependencies
+
+flask
+flask-sqlalchemy
+flask-migrate
+python-dotenv
+pytest
