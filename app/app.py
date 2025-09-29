@@ -19,3 +19,9 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
+migrate.init_app(app, db)
+
+# register blueprints
+from .routes import blueprints
+for bp in blueprints:
+    app.register_blueprint(bp)
