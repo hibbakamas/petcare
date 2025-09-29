@@ -1,1 +1,1 @@
-# Makes "app" a Python package
+# makes "app" a Python package
