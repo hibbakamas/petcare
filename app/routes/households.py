@@ -8,50 +8,45 @@ households_bp = Blueprint("households", __name__, url_prefix="/api/v1/households
 
 @households_bp.post("")
 def create_household():
-    data = request.get_json(force=True)
+    if not request.is_json:
+        return {"error": "Content-Type must be application/json"}, 415
+    data = request.get_json()
     name = data.get("name")
     join_code = data.get("join_code")
 
     if not name or not join_code:
         return {"error": "name and join_code required"}, 400
 
-    # create household
     h = Household(name=name, join_code=join_code)
     db.session.add(h)
     try:
         db.session.commit()
     except IntegrityError:
-        # join code must be unique
         db.session.rollback()
         return {"error": "join_code already in use"}, 409
 
-    return {"id": h.id, "name": h.name, "join_code": h.join_code}, 201
+    body = {"id": h.id, "name": h.name, "join_code": h.join_code}
+    return body, 201, {"Location": f"/api/v1/households/{h.id}"}
 
 @households_bp.get("/<int:household_id>")
 def get_household(household_id):
-    # look up household by id (404 if not found)
     h = Household.query.get_or_404(household_id)
     return {"id": h.id, "name": h.name, "join_code": h.join_code}, 200
 
-@households_bp.put("/<int:household_id>")
-def update_household(household_id):
-    # only name can be updated
+# PATCH instead of PUT for partial update
+@households_bp.patch("/<int:household_id>")
+def patch_household(household_id):
     h = Household.query.get_or_404(household_id)
-    data = request.get_json()
-
-    new_name = data.get("name") if data else None
-    if not new_name:
+    data = request.get_json() or {}
+    if "name" not in data:
         return {"error": "name is required"}, 400
-
-    h.name = new_name
+    h.name = data["name"]
     db.session.commit()
-
     return {"id": h.id, "name": h.name, "join_code": h.join_code}, 200
 
 @households_bp.delete("/<int:household_id>")
 def delete_household(household_id):
-    # delete household and any linked records
     h = Household.query.get_or_404(household_id)
     db.session.delete(h)
     db.session.commit()
-    return {"deleted": True, "id": household_id}, 200
+    return "", 204
