@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Households · PetCare{% endblock %}
+{% block content %}
+<h2>Households</h2>
+
+<p>Welcome{% if session.username %}, {{ session.username }}{% endif %}!</p>
+
+<section class="grid">
+  <article>
+    <h3>Create a household</h3>
+    <p>Start a new household and share the join code.</p>
+    <a href="/households/new" role="button">Create Household</a>
+  </article>
+
+  <article>
+    <h3>Join a household</h3>
+    <p>Have a code? Join an existing household.</p>
+    <a href="/join" role="button" class="secondary">Join Household</a>
+  </article>
+</section>
+
+<section>
+  <h3>Your households</h3>
+  <!-- later we’ll loop through memberships -->
+  <p><em>No households yet.</em></p>
+</section>
+{% endblock %}
