@@ -39,10 +39,6 @@ class Pet(db.Model):
     # each pet belongs to exactly one household
     household_id = db.Column(db.Integer, db.ForeignKey('household.id', ondelete="CASCADE"), nullable=False)
     name = db.Column(db.String, nullable=False)
-    # optional details
-    species = db.Column(db.String)
-    breed = db.Column(db.String)
-    birthdate = db.Column(db.Date)
     # when a pet is deleted, also delete its entries
     entries = db.relationship(
         "Entry",

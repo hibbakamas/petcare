@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Households · PetCare{% endblock %}
-{% block content %}
-<h2>Households</h2>
 
-<p>Welcome{% if session.username %}, {{ session.username }}{% endif %}!</p>
+{% block content %}
+<h2 class="welcome-title">Welcome{% if session.username %}, {{ session.username }}{% endif %}!</h2>
 
 <section class="grid">
   <article>
@@ -21,7 +20,19 @@
 
 <section>
   <h3>Your households</h3>
-  <!-- later we’ll loop through memberships -->
-  <p><em>No households yet.</em></p>
+  {% if memberships %}
+    <ul class="no-bullets">
+  {% for m in memberships %}
+    <li>
+      <a href="{{ url_for('ui.household_dashboard', household_id=m.household.id) }}">
+        {{ m.household.name }}
+      </a>
+      <span class="household-role">as {{ m.nickname }}</span>
+    </li>
+  {% endfor %}
+</ul>
+  {% else %}
+    <p><em>No households yet.</em></p>
+  {% endif %}
 </section>
 {% endblock %}

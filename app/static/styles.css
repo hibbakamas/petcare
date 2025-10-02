@@ -1,0 +1,685 @@
+/* ===== Pastel theme via Pico variables ===== */
+:root {
+  --pico-background-color: #fdf6f9;      /* pastel pink page background */
+  --pico-color: #333;                    /* base text */
+  --pico-muted-color: #666;
+
+  /* Brand colors */
+  --pico-primary: #f7c6d9;               /* pastel pink */
+  --pico-primary-hover: #e8d9ff;         /* pastel lavender hover */
+  --pico-primary-underline: #e8d9ff;
+
+  /* Surfaces & borders */
+  --pico-card-background-color: #ffffff;
+  --pico-border-color: #eadcf0;          /* gentle lavender border */
+  --pico-form-element-background-color: #fff;
+  --pico-form-element-border-color: var(--pico-border-color);
+  --pico-form-element-active-border-color: #d28cd2; /* focus ring */
+}
+
+/* ===== Page background ===== */
+html, body {
+  background: #fdf6f9 !important; /* pastel pink */
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--pico-color);
+}
+
+/* ===== Layout polish (centered, roomy card) ===== */
+main.container {
+  max-width: 1100px;                   /* wider than the default 640px */
+  margin: 2rem auto;                   /* center it on the page */
+  background: rgba(255, 255, 255, 0.85); /* soft translucent white */
+  backdrop-filter: blur(6px);
+  padding: 2rem;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+/* === Household page layout === */
+.household-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;   /* Pets a bit wider than Members */
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .household-grid { grid-template-columns: 1fr; }
+}
+
+/* Heading row with right-aligned action (e.g., Add Pet) */
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 .75rem 0;   /* tighter than default */
+}
+.section-heading h2 { margin: 0; }
+.section-heading .btn, 
+.section-heading .button { margin-left: auto; } /* push button to the right */
+
+/* Tighter lists */
+.list-tight { 
+  margin: 0; 
+  padding-left: 1.25rem;   /* keep bullets but closer in */
+}
+.list-tight li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: .25rem 0;        /* reduce vertical space between items */
+}
+
+/* Inline actions beside the name */
+.list-tight .actions {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 6px;
+}
+
+
+/* Members: name left, Leave link aligned to the right */
+.members-list li {
+  justify-content: space-between;
+}
+.members-list .who {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+/* Optional: make the main card a bit tighter vertically */
+main.container { padding: 1.75rem; }
+
+
+
+/* === Tabs === */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  border-bottom: 1px solid var(--pico-border-color);
+  margin: 1rem 0 1.25rem;
+}
+.tabs a {
+  padding: .6rem .8rem;
+  border-radius: 10px 10px 0 0;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+.tabs a.active {
+  background: #ffffffcc;               /* soft white, fits your frosted card */
+  border: 1px solid var(--pico-border-color);
+  border-bottom-color: transparent;    /* blend with the bottom border */
+  font-weight: 700;
+}
+
+/* Show only the active panel */
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+
+/* Heading row (keeps Add Pet at the right edge) */
+.section-heading { display:flex; align-items:center; gap:12px; margin:0 0 .75rem; }
+.section-heading h3 { margin:0; }
+.section-heading .button,
+.section-heading a[role="button"] {
+  margin-left: auto !important;
+  display: inline-block !important;
+  width: auto !important;
+  padding: .4rem .9rem !important;
+  border-radius: 10px !important;
+}
+.button-small { padding: .4rem .9rem !important; border-radius: 10px !important; }
+
+
+/* ===== Header/footer ===== */
+/* ===== Site header/footer ===== */
+body > header,
+body > footer {
+  background: #e8d9ff; /* pastel lavender */
+  border: none;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+header nav ul { align-items: center; }
+
+/* Pet detail header (no background) */
+.pet-header {
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+
+/* Kill stray dark borders */
+hr, header, footer, .border, .divider {
+  border-color: var(--pico-border-color) !important;
+}
+footer { border-top: 1px solid var(--pico-border-color) !important; }
+
+/* ===== Buttons (normalize all to pastel) ===== */
+button,
+[type="submit"],
+[type="button"],
+a[role="button"],
+.button {
+  background: #e8d9ff !important;   /* pastel purple */
+  color: #333 !important;           /* dark grey text */
+  border: 1px solid #eadcf0 !important; /* soft lavender border */
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  padding: .6rem 1rem !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover,
+[type="submit"]:hover,
+[type="button"]:hover,
+a[role="button"]:hover,
+.button:hover {
+  background: #9c8ac6 !important;  /* pastel lavender hover */
+  color: #333 !important;
+}
+
+/* Optional: secondary variant (lavender) */
+.btn-secondary {
+  background: #e8d9ff !important;
+  border: 1px solid #d3c2e6 !important;
+  color: #333 !important;
+}
+
+.btn-danger {
+  background: #ffd6e0 !important;
+  border-color: #f0a5b8 !important;
+  color: #7a2b3b !important;
+}
+
+
+/* Secondary / danger variants */
+.btn-secondary {
+  background: #e8d9ff !important;
+}
+.btn-danger {
+  background: #ffd6e0 !important;
+  border-color: #f0a5b8 !important;
+  color: #7a2b3b !important;
+}
+
+/* Delete button like a link, but no hover effect */
+.btn-danger {
+  background: none !important;
+  border: none !important;
+  color: #bf6275 !important;   /* muted red */
+  font-size: 0.9rem !important;
+  padding: 0 !important;
+  display: inline !important;
+  width: auto !important;
+  min-width: unset !important;
+  line-height: 1.2 !important;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Remove ALL hover/focus changes */
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active {
+  color: #b23b4a !important;
+  background: none !important;
+  text-decoration: underline !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.inline-form { display:inline; margin-left:12px; }
+.entry-actions {
+  display: inline-flex;
+  gap: 6px;             /* spacing between edit + delete */
+  align-items: baseline;
+  margin-left: 12px;     /* push the whole group away from entry text */
+}
+
+/* Inline action buttons (Delete / Leave) */
+.inline-action {
+  background: none !important;
+  border: none !important;
+  color: #bf6275 !important;   /* muted red */
+  font-size: 0.9rem !important;
+  padding: 0 !important;
+  margin-left: 8px;            /* space between name and button */
+  display: inline !important;
+  width: auto !important;
+  min-width: unset !important;
+  line-height: 1.2 !important;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.inline-action:hover,
+.inline-action:focus,
+.inline-action:active {
+  color: #7a2b3b !important;
+  background: none !important;
+  text-decoration: underline !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* ===== Inputs ===== */
+input, select, textarea {
+  border-radius: 10px !important;
+}
+
+/* ===== Error text ===== */
+.error, [role="alert"] {
+  color: #d94f70;
+  font-weight: 700;
+}
+
+/* Softer pastel lavender for links */
+a { color: #9c8ac6; }        /* pastel but not glowing */
+a:hover { color: #7d6ba8; }  /* darker on hover */
+
+/* Tabs layout: keep items left, action on the right */
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--pico-border-color);
+  margin: 1rem 0 1.25rem;
+}
+.tabs .tab-list {
+  display: flex;
+  gap: .5rem;
+}
+.tabs .tab-list a {
+  flex: 0 0 auto;            /* stop stretching */
+  padding: .6rem .8rem;
+  border-radius: 10px 10px 0 0;
+  text-decoration: none;
+  color: inherit;
+}
+.tabs .tab-list a.active {
+  background: #ffffffcc;
+  border: 1px solid var(--pico-border-color);
+  border-bottom-color: transparent;
+  font-weight: 700;
+}
+
+/* Put the action (Add Pet) on the right end of the bar */
+.tabs-with-action {
+  justify-content: space-between;
+}
+
+/* Ghost style for the Add Pet button so it doesn’t look like a big CTA */
+.button-ghost {
+  background: transparent !important;
+  color: #9c8ac6 !important;   /* pastel lavender text */
+  border: 1px solid var(--pico-border-color) !important;
+}
+.button-ghost:hover {
+  background: rgba(0,0,0,.03) !important;
+}
+
+/* Panels: only show active */
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+
+/* Compact action bar above the list */
+.panel-bar {
+  display: flex;
+  align-items: center;
+  margin: .25rem 0 .75rem;
+}
+.panel-bar .button { margin-left: auto; }
+
+/* Split list items: name left, actions right (for pets and members) */
+.list-split li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .75rem;
+}
+
+/* Make the Add Pet a true ghost button (override global button rules) */
+.button-ghost {
+  background: transparent !important;
+  border: 1px solid var(--pico-border-color) !important;
+  color: #9c8ac6 !important;   /* pastel lavender text */
+  box-shadow: none !important;
+}
+.button-ghost:hover { background: rgba(0,0,0,.03) !important; }
+
+/* Subtle inline danger links on the right */
+.danger-link {
+  background: none !important;
+  border: none !important;
+  color: #bf6275 !important;
+  padding: 0 !important;
+  text-decoration: underline;
+  width: auto !important;
+  min-width: unset !important;
+  line-height: 1.2 !important;
+  cursor: pointer;
+}
+.danger-link:hover { color: #7a2b3b !important; }
+
+/* Add-row styled like a list item */
+.add-row {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .6rem;
+  padding: .5rem .75rem;
+  border: 1px dashed var(--pico-border-color);
+  border-radius: 10px;
+  text-decoration: none;
+  color: #8aa3c6 !important; 
+  background: transparent;
+  transition: background .15s ease, border-color .15s ease;
+}
+.add-row:hover {
+  background: rgba(0,0,0,.03);
+  border-color: #d9cbed; /* slightly stronger lavender */
+}
+.add-row .plus {
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  width: 1rem;
+  text-align: center;
+}
+
+/* Keep pet rows split: name left, action right */
+.list-split li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .75rem;
+}
+
+/* Subtle right-side action */
+.danger-link {
+  background: none !important;
+  border: none !important;
+  color: #bf6275 !important;
+  padding: 0 !important;
+  text-decoration: underline;
+  width: auto !important;
+  min-width: unset !important;
+  line-height: 1.2 !important;
+  cursor: pointer;
+}
+.danger-link:hover { color: #7a2b3b !important; }
+
+/* add a tiny gap after the link so the underline visually stops earlier */
+.household-link { 
+  margin-right: .3rem;                   /* space before “as …” */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  text-decoration-skip-ink: auto;
+}
+
+/* lighter “as …” text */
+.household-role { 
+  color: var(--pico-muted-color);
+}
+
+/* Clear heading hierarchy for the pet page */
+.pet-title   { font-size: 2rem;   font-weight: 700; margin: 0 0 .5rem; }   /* h1 */
+.pet-subtitle{ font-size: 1.25rem; font-weight: 650; margin: 1rem 0 .5rem; } /* h3 */
+.pet-section { font-size: 1.25rem; font-weight: 650; margin: 1.25rem 0 .5rem; }/* h2 */
+
+/* Entry form layout */
+.entry-form { margin: .5rem 0 1rem; }
+.entry-form textarea { min-height: 110px; }
+
+/* Keep Add button aligned right (form only) */
+.entry-actions { display: flex; justify-content: flex-end; margin-top: .5rem; }
+.entry-actions .button { width: auto !important; padding: .45rem 1rem !important; }
+
+/* Subtle action links */
+.action-inline {
+  background: none !important; border: none !important;
+  color: #9c8ac6 !important; padding: 0 !important;
+  text-decoration: underline; cursor: pointer; width: auto !important;
+}
+.action-inline.danger { color: #bf6275 !important; }
+.action-inline.danger:hover { color: #7a2b3b !important; }
+
+/* Filter row: dropdown + button side-by-side */
+.controls-row { display: flex; gap: 1rem; align-items: center; }
+.controls-row select { flex: 1; }
+.controls-row button { flex: 0; }
+
+/* ===== Entries list: ONLY spacing + alignment (no color/position changes) ===== */
+.entries-list { list-style: none; padding-left: 0; margin: 0; }  /* reset ul */
+
+.entries-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;   /* text | actions */
+  align-items: center;
+  column-gap: 1rem;
+  padding: .3rem 0;                  /* consistent vertical rhythm */
+  margin: 0;                          /* kill li margins */
+}
+
+.entries-list .entry-text { line-height: 1.35; }
+
+.entries-list .entry-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .75rem;
+  min-width: 120px;                  /* reserve right-side space even when empty */
+  white-space: nowrap;
+}
+
+/* action links/buttons inside entries shouldn’t inflate row height */
+.entries-list .entry-actions .action-inline,
+.entries-list .entry-actions button.action-inline {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  border: none !important;
+  line-height: 1.1 !important;
+}
+
+/* inline delete form stays inline and adds no spacing */
+.entries-list .entry-actions .inline-form { display: inline; margin: 0; }
+
+/* === ENTRIES: lock rows to one line so spacing is even === */
+.entries-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;  /* text | actions */
+  align-items: center;
+  column-gap: 1rem;
+  padding: .3rem 0;
+  margin: 0;
+}
+
+.entries-list .entry-text {
+  min-width: 0;                 /* allow shrinking in grid */
+  overflow: hidden;             /* hide overflowed text */
+  text-overflow: ellipsis;      /* show "…" when clipped */
+  white-space: nowrap;          /* keep to one line */
+  line-height: 1.35;
+}
+
+.entries-list .entry-actions {
+  display: inline-flex;
+  gap: .75rem;
+  white-space: nowrap;
+  justify-content: flex-end;
+  min-width: 120px;
+}
+
+/* make inline action links not change row height */
+.entries-list .entry-actions .action-inline,
+.entries-list .entry-actions button.action-inline {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  border: none !important;
+  line-height: 1.1 !important;
+}
+
+/* inline delete form shouldn't add spacing */
+.entries-list .entry-actions .inline-form { display: inline; margin: 0 !important; }
+
+/* normalize small text inside entries */
+.entries-list .entry-text small {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.35 !important;  /* match parent */
+  display: inline;               /* don't expand row height */
+}
+
+/* Kill Pico's default li+li spacing inside the entries list */
+.entries-list li + li { margin-top: 0 !important; }
+
+/* === Normalize entry row height whether actions exist or not === */
+.entries-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;   /* text | actions */
+  align-items: center;
+  column-gap: 1rem;
+  padding: .3rem 0;
+  margin: 0;
+}
+
+.entries-list .entry-text {
+  line-height: 1.35;
+}
+
+/* Reserve same action cell space for every row */
+.entries-list .entry-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .75rem;
+  min-width: 120px;   /* <- forces same width even if empty */
+  height: 1.35em;     /* <- lock height so row doesn't grow */
+  white-space: nowrap;
+}
+
+/* Strip default spacing from forms/buttons inside */
+.entries-list .entry-actions .inline-form,
+.entries-list .entry-actions form,
+.entries-list .entry-actions button,
+.entries-list .entry-actions a {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.35 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.welcome-title {
+  margin-bottom: 2rem;
+}
+
+/* Profile layout */
+.profile-page { display: grid; gap: 1.5rem; }
+.profile-title { margin: 0 0 .25rem; }
+.section-title { margin: 0 0 .75rem; }
+
+/* Card look */
+.card,
+.household-card {
+  background: #fff;
+  border: 1px solid var(--pico-border-color);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.035);
+}
+
+/* Grid of household cards */
+.household-grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 900px) {
+  .household-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Card header: name + Open button */
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: .5rem;
+}
+.household-name { margin: 0; }
+
+/* Inputs stretch full width */
+.household-card input,
+.card input {
+  width: 100%;
+}
+
+/* Actions inline, right-aligned, not huge */
+.row-actions {
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
+  margin-top: .6rem;
+}
+.row-actions > * {
+  width: auto !important;
+  padding: .5rem 1rem !important;
+  border-radius: 10px !important;
+}
+
+/* Smaller ghost button variant for "Open" */
+.button-ghost.small {
+  padding: .35rem .8rem !important;
+  font-weight: 600 !important;
+  color: #9c8ac6 !important;
+  border: 1px solid var(--pico-border-color) !important;
+  background: transparent !important;
+}
+.button-ghost.small:hover {
+  color: #7d6ba8 !important;
+  border-color: #9c8ac6 !important;
+}
+
+/* Tidy section spacing inside cards */
+.card label,
+.household-card label { margin: .25rem 0 .4rem; display:block; }
+
+/* remove bullets, including Pico's marker styling */
+.no-bullets,
+.no-bullets li {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+.no-bullets li::marker { content: "" !important; } /* hides square bullets */
+
+nav ul {
+  display: flex;
+  align-items: center;   /* aligns logo + links in the middle */
+  gap: 0.5rem;           /* spacing between items */
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #9c8ac6;
+  line-height: 1.2;        /* avoid extra height messing alignment */
+  display: flex;
+  align-items: center;   /* keeps baseline even */
+  position: relative;
+  top: -2px;   /* 👈 nudge upwards, adjust to taste (-1px, -2px, -3px) */
+  text-shadow: 1px 1px 2px rgba(156, 138, 198, 0.2);
+  background: linear-gradient(90deg, #9c8ac6, #f7c6f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

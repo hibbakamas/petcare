@@ -8,8 +8,6 @@ households_bp = Blueprint("households", __name__, url_prefix="/api/v1/households
 
 @households_bp.post("")
 def create_household():
-    if not request.is_json:
-        return {"error": "Content-Type must be application/json"}, 415
     data = request.get_json()
     name = data.get("name")
     join_code = data.get("join_code")

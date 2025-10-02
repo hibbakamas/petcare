@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Join Household · PetCare{% endblock %}
+{% block content %}
+<h2>Join a household</h2>
+
+{% if error %}
+  <p style="color:crimson">{{ error }}</p>
+  {% if existing_household %}
+    <p>
+      <a role="button"
+         href="{{ url_for('ui.household_dashboard', household_id=existing_household.id) }}">
+        Open “{{ existing_household.name }}”
+      </a>
+    </p>
+  {% endif %}
+{% endif %}
+
+<form method="post" action="{{ url_for('ui.join_post') }}">
+  <label>Join code
+    <input name="code" maxlength="6" style="text-transform:uppercase" required>
+  </label>
+  <label>Nickname (optional)
+    <input name="nickname" placeholder="{{ session.username or 'Owner' }}">
+  </label>
+  <button type="submit">Join</button>
+</form>
+{% endblock %}
