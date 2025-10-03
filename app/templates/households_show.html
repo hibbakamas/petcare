@@ -4,8 +4,11 @@
 {% block content %}
 {% set active_tab = request.args.get('tab', 'pets') %}
 
-<h2>{{ household.name }}</h2>
-<p>Join code: <strong>{{ household.join_code }}</strong></p>
+<h2 class="household-header">
+  <a href="{{ url_for('ui.households_index') }}" class="back-arrow">&lsaquo;</a>
+  {{ household.name }}
+</h2>
+<p class="join-code">Join code: <strong>{{ household.join_code }}</strong></p>
 
 <!-- Tabs stay the same, no Add button inside them -->
 <nav class="tabs">

@@ -2,14 +2,10 @@
 {% block title %}{{ pet.name }} · PetCare{% endblock %}
 
 {% block content %}
-<header class="grid pet-header">
-  <div>
-    <h1 class="pet-title">{{ pet.name }}</h1>
-    {% if pet.species or pet.breed %}
-      <p>{{ pet.species }}{% if pet.breed %} — {{ pet.breed }}{% endif %}</p>
-    {% endif %}
-  </div>
-</header>
+<h2 class="pet-header">
+  <a href="{{ url_for('ui.household_dashboard', household_id=pet.household_id) }}" class="back-arrow">&lsaquo;</a>
+  {{ pet.name }}
+</h2>
 
 <section>
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
@@ -24,40 +20,40 @@
 <section>
   <h2 class="pet-section">Entries</h2>
 
-  <form method="get" class="controls-row" style="max-width:420px;margin:0 0 1rem 0;">
-  <label>
-    <select name="range">
-      <option value="day"   {{ 'selected' if range=='day' else '' }}>Daily</option>
-      <option value="week"  {{ 'selected' if range=='week' else '' }}>Weekly</option>
-      <option value="month" {{ 'selected' if range=='month' else '' }}>Monthly</option>
-      <option value="all"   {{ 'selected' if range=='all' else '' }}>All</option>
-    </select>
-  </label>
-  <button type="submit">Filter</button>
-</form>
+  <form method="get" action="{{ url_for('ui.pets_show', pet_id=pet.id) }}" class="controls-row" style="max-width:420px;margin:0 0 1rem 0;">
+    <label>
+      <select name="range">
+        <option value="today" {{ 'selected' if range=='today' else '' }}>Daily</option>
+        <option value="week"  {{ 'selected' if range=='week'  else '' }}>Weekly</option>
+        <option value="month" {{ 'selected' if range=='month' else '' }}>Monthly</option>
+        <option value="all"   {{ 'selected' if range=='all'   else '' }}>All</option>
+      </select>
+    </label>
+    <button type="submit">Filter</button>
+  </form>
 
   {% if entries %}
-<ul class="entries-list" role="list">
-  {% for e in entries %}
-    <li>
-      <span class="entry-text">
-        <small>{{ e.created_at | localdt }}</small>
-        — {{ members_map.get(e.user_id, "Unknown") }}: {{ e.content }}
-      </span>
+  <ul class="entries-list" role="list">
+    {% for e in entries %}
+      <li>
+        <span class="entry-text">
+          <small>{{ e.created_at | localdt }}</small>
+          — {{ members_map.get(e.user_id, "Unknown") }}: {{ e.content }}
+        </span>
 
-      <span class="entry-actions">
-        {% if e.user_id == session.user_id %}
-          <a class="action-inline" href="{{ url_for('ui.entries_edit_get', pet_id=pet.id, entry_id=e.id) }}">Edit</a>
-          <form method="post"
-                action="{{ url_for('ui.entries_delete', pet_id=pet.id, entry_id=e.id) }}"
-                class="inline-form">
-            <button type="submit" class="action-inline danger">Delete</button>
-          </form>
-        {% endif %}
-      </span>
-    </li>
-  {% endfor %}
-</ul>
+        <span class="entry-actions">
+          {% if e.user_id == session.user_id %}
+            <a class="action-inline" href="{{ url_for('ui.entries_edit_get', pet_id=pet.id, entry_id=e.id) }}">Edit</a>
+            <form method="post"
+                  action="{{ url_for('ui.entries_delete', pet_id=pet.id, entry_id=e.id) }}"
+                  class="inline-form">
+              <button type="submit" class="action-inline danger">Delete</button>
+            </form>
+          {% endif %}
+        </span>
+      </li>
+    {% endfor %}
+  </ul>
   {% else %}
     <p><em>No entries yet.</em></p>
   {% endif %}

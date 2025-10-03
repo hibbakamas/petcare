@@ -3,7 +3,7 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy import desc
 from ..models import db, Users, Household, HouseholdMember, Pet, Entry
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from werkzeug.security import generate_password_hash, check_password_hash
 
 ui = Blueprint("ui", __name__)
@@ -206,31 +206,41 @@ def pets_show(pet_id):
     if not pet:
         return render_template("errors/404.html"), 404
 
-    # range filter: day (default) | week | month | all
-    rng = (request.args.get("range") or "day").lower()
+    # range filter: today | week | month | all  (calendar-based)
+    rng = (request.args.get("range") or "today").lower()
     now = datetime.utcnow()
-    if rng == "week":
-        start = now - timedelta(days=7)
+    today = now.date()
+
+    if rng in ("today", "daily", "day"):
+        # Today from 00:00 (UTC) to now
+        start = datetime.combine(today, time.min)
+        rng = "today"  # normalize for template
+    elif rng == "week":
+        # Monday 00:00 of this week (UTC)
+        monday = today - timedelta(days=today.weekday())
+        start = datetime.combine(monday, time.min)
     elif rng == "month":
-        start = now - timedelta(days=30)
+        # 1st day 00:00 of this month (UTC)
+        first = today.replace(day=1)
+        start = datetime.combine(first, time.min)
     elif rng == "all":
         start = None
-    else:  # "day"
-        start = now - timedelta(days=1)
+    else:
+        start = datetime.combine(today, time.min)
+        rng = "today"
 
     q = db.session.query(Entry).filter(Entry.pet_id == pet_id)
     if start:
         q = q.filter(Entry.created_at >= start)
     entries = q.order_by(desc(Entry.created_at)).all()
 
-    # 👇 nickname map from this pet's household: user_id -> nickname
     members_map = {m.user_id: m.nickname for m in pet.household.members}
 
     return render_template(
         "pets_show.html",
         pet=pet,
         entries=entries,
-        range=rng,
+        range=rng,  # normalized key for the dropdown
         members_map=members_map
     )
 

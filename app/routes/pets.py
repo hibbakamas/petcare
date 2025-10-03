@@ -77,22 +77,7 @@ def patch_pet(pet_id):
         if not data["name"]:
             return {"error": "name cannot be empty"}, 400
         p.name = data["name"]
-    if "species" in data:
-        p.species = data["species"]
-    if "breed" in data:
-        p.breed = data["breed"]
-    if "birthdate" in data:
-        bd = data["birthdate"]
-        if bd:
-            try:
-                from datetime import date
-                y, m, d = map(int, bd.split("-"))
-                p.birthdate = date(y, m, d)
-            except Exception:
-                return {"error": "birthdate must be YYYY-MM-DD"}, 400
-        else:
-            p.birthdate = None
-
+        
     db.session.commit()
     return {
         "id": p.id,

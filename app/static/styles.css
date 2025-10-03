@@ -683,3 +683,65 @@ nav ul {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--pico-primary-hover);
+  text-decoration: none;
+}
+
+.pet-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-arrow {
+  font-size: 1.5rem;      /* smaller than h2 */
+  font-weight: normal;  /* not bold */
+  text-decoration: none;
+  margin-right: 0.5rem;
+  color: inherit;       /* matches the text color */
+}
+.back-arrow:hover {
+  color: #7d6ba8 !important
+}
+
+/* stop Pico's underline on these links */
+a.household-link,
+a.household-link:link,
+a.household-link:visited {
+  text-decoration: none !important;
+  background-image: none !important; /* Pico often uses bg-gradient underline */
+  box-shadow: none !important;
+}
+
+/* our own underline that hugs the text only */
+a.household-link > span {
+  display: inline; /* exactly the text width */
+  border-bottom: 2px solid var(--pico-primary-underline);
+  padding-bottom: .05em;
+}
+
+a.household-link:hover > span {
+  border-bottom-color: var(--pico-primary-hover);
+}
+
+/* add spacing after the link without underlining it */
+a.household-link { margin-right: .25rem; }
+
+.household-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;  /* remove extra gap below h2 */
+}
+
+.join-code {
+  margin-left: 1.5rem;  /* indent so it lines up with household name */
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  color: #444;
+}

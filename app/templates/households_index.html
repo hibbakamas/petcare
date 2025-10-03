@@ -24,10 +24,9 @@
     <ul class="no-bullets">
   {% for m in memberships %}
     <li>
-      <a href="{{ url_for('ui.household_dashboard', household_id=m.household.id) }}">
-        {{ m.household.name }}
-      </a>
-      <span class="household-role">as {{ m.nickname }}</span>
+<a href="{{ url_for('ui.household_dashboard', household_id=m.household.id) }}" class="household-link">
+  <span>{{ m.household.name }}</span>
+</a> as {{ m.nickname }}
     </li>
   {% endfor %}
 </ul>
