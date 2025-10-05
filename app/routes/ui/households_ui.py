@@ -12,15 +12,22 @@ def _gen_code(n=6):
 @households_ui.get("/households")
 def households_index():
     user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("auth_ui.login_get"))
     memberships = db.session.query(HouseholdMember).filter_by(user_id=user_id).all()
     return render_template("households_index.html", memberships=memberships)
 
 @households_ui.get("/households/new")
 def households_new_get():
+    if not session.get("user_id"):
+        return redirect(url_for("auth_ui.login_get"))
     return render_template("households_new.html")
 
 @households_ui.post("/households/new")
 def households_new_post():
+    if not session.get("user_id"):
+        return redirect(url_for("auth_ui.login_get"))
+
     name = request.form.get("name", "").strip()
     nickname = (request.form.get("nickname", "") or session.get("username", "") or "Owner").strip()
 
@@ -49,10 +56,15 @@ def households_new_post():
 
 @households_ui.get("/join")
 def join_get():
+    if not session.get("user_id"):
+        return redirect(url_for("auth_ui.login_get"))
     return render_template("join.html")
 
 @households_ui.post("/join")
 def join_post():
+    if not session.get("user_id"):
+        return redirect(url_for("auth_ui.login_get"))
+
     code = request.form.get("code", "").strip().upper()
     nickname = (request.form.get("nickname", "") or session.get("username", "") or "").strip()
 
@@ -84,6 +96,9 @@ def join_post():
 
 @households_ui.post("/households/<int:household_id>/leave")
 def households_leave(household_id):
+    if not session.get("user_id"):
+        return redirect(url_for("auth_ui.login_get"))
+
     m = db.session.query(HouseholdMember).filter_by(
         user_id=session["user_id"], household_id=household_id
     ).first()
@@ -95,6 +110,9 @@ def households_leave(household_id):
 
 @households_ui.get("/households/<int:household_id>")
 def household_dashboard(household_id):
+    if not session.get("user_id"):
+        return redirect(url_for("auth_ui.login_get"))
+
     h = db.session.get(Household, household_id)
     if not h:
         return render_template("errors/404.html"), 404

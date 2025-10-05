@@ -1,8 +1,8 @@
-"""add household_member
+"""initial tables
 
-Revision ID: 5ccbe3540fdd
-Revises: 6eed6dd81759
-Create Date: 2025-10-04 20:54:09.220267
+Revision ID: 307bb45e7fa8
+Revises: 
+Create Date: 2025-10-05 12:43:19.815516
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5ccbe3540fdd'
-down_revision = '6eed6dd81759'
+revision = '307bb45e7fa8'
+down_revision = None
 branch_labels = None
 depends_on = None
 

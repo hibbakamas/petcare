@@ -64,9 +64,7 @@
     <h2 class="section-title">Session</h2>
     <p>Logged in as <strong>{{ user.username }}</strong></p>
     <div class="row-actions">
-      <form method="post" action="{{ url_for('auth_ui.logout_post') }}">
-        <button type="submit" class="btn-danger">Logout</button>
-      </form>
+      <a href="{{ url_for('auth_ui.logout_get') }}" class="btn-danger">Logout</a>
     </div>
   </section>
 </div>

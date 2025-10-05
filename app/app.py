@@ -1,8 +1,8 @@
 # app/app.py
 # main entrypoint (factory pattern)
 
-from flask import Flask, jsonify
-from .config import Config
+from flask import Flask, jsonify, render_template
+from .config import Config, TestingConfig
 from .db import db, migrate
 from .routes.api import api_blueprints
 from .routes.ui import ui_blueprints
@@ -12,14 +12,19 @@ from datetime import timezone
 from zoneinfo import ZoneInfo
 
 
-def create_app():
+def create_app(testing: bool = False):
     """
     Application factory.
     Creates a fresh Flask app, wires config, DB, blueprints,
     Jinja filters, and JSON error handlers.
     """
     app = Flask(__name__, template_folder="templates", static_folder="static")
-    app.config.from_object(Config)
+
+    # choose config
+    if testing:
+        app.config.from_object(TestingConfig)
+    else:
+        app.config.from_object(Config)
 
     # init extensions
     db.init_app(app)
@@ -28,7 +33,6 @@ def create_app():
     # register blueprints
     for bp in api_blueprints:
         app.register_blueprint(bp)
-     # register blueprints
     for bp in ui_blueprints:
         app.register_blueprint(bp)
 
@@ -59,9 +63,10 @@ def create_app():
     def bad_request(e):
         return jsonify(error="Bad Request"), 400
 
-    @app.errorhandler(500)
-    def internal_error(e):
-        return jsonify(error="Internal Server Error"), 500
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template("errors/403.html"), 403
+
 
     @app.errorhandler(405)
     def method_not_allowed(e):

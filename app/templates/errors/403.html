@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% block title %}Not Found · PetCare{% endblock %}
+{% block title %}Forbidden · PetCare{% endblock %}
 {% block content %}
-  <h2>Not Found</h2>
-  <p>We couldn’t find that page.</p>
+  <h2>Forbidden</h2>
+  <p>You don’t have permission to do that.</p>
   <p><a href="{{ url_for('households_ui.households_index') }}">Go back to Households</a></p>
 {% endblock %}
