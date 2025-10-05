@@ -5,7 +5,7 @@
 {% set active_tab = request.args.get('tab', 'pets') %}
 
 <h2 class="household-header">
-  <a href="{{ url_for('ui.households_index') }}" class="back-arrow">&lsaquo;</a>
+  <a href="{{ url_for('households_ui.households_index') }}" class="back-arrow">&lsaquo;</a>
   {{ household.name }}
 </h2>
 <p class="join-code">Join code: <strong>{{ household.join_code }}</strong></p>
@@ -13,9 +13,9 @@
 <!-- Tabs stay the same, no Add button inside them -->
 <nav class="tabs">
   <div class="tab-list">
-    <a href="{{ url_for('ui.household_dashboard', household_id=household.id, tab='pets') }}"
+    <a href="{{ url_for('households_ui.household_dashboard', household_id=household.id, tab='pets') }}"
        class="{{ 'active' if active_tab == 'pets' else '' }}">Pets</a>
-    <a href="{{ url_for('ui.household_dashboard', household_id=household.id, tab='members') }}"
+    <a href="{{ url_for('households_ui.household_dashboard', household_id=household.id, tab='members') }}"
        class="{{ 'active' if active_tab == 'members' else '' }}">Members</a>
   </div>
 </nav>
@@ -26,9 +26,9 @@
     <ul class="list-tight list-split pets-list">
       {% for p in pets %}
         <li>
-          <a class="name" href="{{ url_for('ui.pets_show', pet_id=p.id) }}">{{ p.name }}</a>
+          <a class="name" href="{{ url_for('pets_ui.pets_show', pet_id=p.id) }}">{{ p.name }}</a>
           <form method="post"
-                action="{{ url_for('ui.pets_delete', household_id=household.id, pet_id=p.id) }}"
+                action="{{ url_for('pets_ui.pets_delete', household_id=household.id, pet_id=p.id) }}"
                 class="inline-form">
             <button type="submit" class="inline-action danger-link">Delete</button>
           </form>
@@ -41,7 +41,7 @@
 
   <!-- add-row sits UNDER the list -->
   <a class="add-row"
-     href="{{ url_for('ui.pets_new_get', household_id=household.id) }}">
+     href="{{ url_for('pets_ui.pets_new_get', household_id=household.id) }}">
     <span class="plus">+</span> Add a pet
   </a>
 </section>
@@ -56,7 +56,7 @@
           <span class="who">{{ m.nickname }}</span>
           {% if session.user_id == m.user_id %}
             <form method="post"
-                  action="{{ url_for('ui.households_leave', household_id=household.id) }}"
+                  action="{{ url_for('households_ui.households_leave', household_id=household.id) }}"
                   class="inline-form">
               <button type="submit" class="inline-action danger-link">Leave</button>
             </form>

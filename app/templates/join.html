@@ -8,14 +8,14 @@
   {% if existing_household %}
     <p>
       <a role="button"
-         href="{{ url_for('ui.household_dashboard', household_id=existing_household.id) }}">
+         href="{{ url_for('households_ui.household_dashboard', household_id=existing_household.id) }}">
         Open “{{ existing_household.name }}”
       </a>
     </p>
   {% endif %}
 {% endif %}
 
-<form method="post" action="{{ url_for('ui.join_post') }}">
+<form method="post" action="{{ url_for('households_ui.join_post') }}">
   <label>Join code
     <input name="code" maxlength="6" style="text-transform:uppercase" required>
   </label>

@@ -1,7 +1,7 @@
 # app/routes/auth.py
 from flask import Blueprint, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from ..models import db, Users
+from ...models import db, Users
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 

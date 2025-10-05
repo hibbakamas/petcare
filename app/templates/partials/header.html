@@ -2,17 +2,17 @@
   <ul>
     <li><span class="logo-text">🐾PetCare</span></li>
     {% if session.user_id %}
-      <li><a href="{{ url_for('ui.households_index') }}">Households</a></li>
-      <li><a href="{{ url_for('ui.profile_get') }}">Profile</a></li>
+      <li><a href="{{ url_for('households_ui.households_index') }}">Households</a></li>
+      <li><a href="{{ url_for('users_ui.profile_get') }}">Profile</a></li>
     {% endif %}
   </ul>
   <ul>
     {% if session.user_id %}
       <li><span>Hi, {{ session.username }}</span></li>
-      <li><a href="{{ url_for('ui.logout') }}">Logout</a></li>
+      <li><a href="{{ url_for('auth_ui.logout_get') }}">Logout</a></li>
     {% else %}
-      <li><a href="{{ url_for('ui.login_get') }}">Login</a></li>
-      <li><a href="{{ url_for('ui.signup_get') }}">Sign up</a></li>
+      <li><a href="{{ url_for('auth_ui.login_get') }}">Login</a></li>
+      <li><a href="{{ url_for('auth_ui.signup_get') }}">Sign up</a></li>
     {% endif %}
   </ul>
 </nav>

@@ -8,6 +8,6 @@
 <form method="post">
   <textarea name="content" rows="3" required>{{ entry.content }}</textarea>
   <button type="submit">Save Changes</button>
-  <a href="{{ url_for('ui.pets_show', pet_id=pet_id) }}" role="button" class="secondary">Cancel</a>
+  <a href="{{ url_for('pets_ui.pets_show', pet_id=pet_id) }}" role="button" class="secondary">Cancel</a>
 </form>
 {% endblock %}
