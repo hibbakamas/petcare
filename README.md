@@ -19,7 +19,7 @@ Users can create or join households, add pets, and record daily or weekly timeli
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/<your-username>/petcare.git
+git clone https://github.com/hibbakamas/petcare.git
 cd petcare
 ````
 
