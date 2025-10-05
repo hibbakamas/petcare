@@ -1,71 +1,101 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}{{ household.name }} · PetCare{% endblock %}
 
 {% block content %}
-{% set active_tab = request.args.get('tab', 'pets') %}
+  {% set active_tab = request.args.get("tab", "pets") %}
 
-<h2 class="household-header">
-  <a href="{{ url_for('households_ui.households_index') }}" class="back-arrow">&lsaquo;</a>
-  {{ household.name }}
-</h2>
-<p class="join-code">Join code: <strong>{{ household.join_code }}</strong></p>
+  <h2 class="household-header">
+    <a
+      href="{{ url_for('households_ui.households_index') }}"
+      class="back-arrow"
+    >
+      &lsaquo;
+    </a>
+    {{ household.name }}
+  </h2>
 
-<!-- Tabs stay the same, no Add button inside them -->
-<nav class="tabs">
-  <div class="tab-list">
-    <a href="{{ url_for('households_ui.household_dashboard', household_id=household.id, tab='pets') }}"
-       class="{{ 'active' if active_tab == 'pets' else '' }}">Pets</a>
-    <a href="{{ url_for('households_ui.household_dashboard', household_id=household.id, tab='members') }}"
-       class="{{ 'active' if active_tab == 'members' else '' }}">Members</a>
-  </div>
-</nav>
+  <p class="join-code">
+    Join code: <strong>{{ household.join_code }}</strong>
+  </p>
 
-<!-- Pets panel -->
-<section class="tab-panel {{ 'is-active' if active_tab == 'pets' else '' }}">
-  {% if pets %}
-    <ul class="list-tight list-split pets-list">
-      {% for p in pets %}
-        <li>
-          <a class="name" href="{{ url_for('pets_ui.pets_show', pet_id=p.id) }}">{{ p.name }}</a>
-          <form method="post"
-                action="{{ url_for('pets_ui.pets_delete', household_id=household.id, pet_id=p.id) }}"
-                class="inline-form">
-            <button type="submit" class="inline-action danger-link">Delete</button>
-          </form>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p><em>No pets yet.</em></p>
-  {% endif %}
+  <!-- Tabs -->
+  <nav class="tabs">
+    <div class="tab-list">
+      <a
+        href="{{ url_for('households_ui.household_dashboard', household_id=household.id, tab='pets') }}"
+        class="{{ 'active' if active_tab == 'pets' else '' }}"
+      >
+        Pets
+      </a>
+      <a
+        href="{{ url_for('households_ui.household_dashboard', household_id=household.id, tab='members') }}"
+        class="{{ 'active' if active_tab == 'members' else '' }}"
+      >
+        Members
+      </a>
+    </div>
+  </nav>
 
-  <!-- add-row sits UNDER the list -->
-  <a class="add-row"
-     href="{{ url_for('pets_ui.pets_new_get', household_id=household.id) }}">
-    <span class="plus">+</span> Add a pet
-  </a>
-</section>
-
-
-<!-- Members panel (add list-split so Leave sits at the right edge) -->
-<section class="tab-panel {{ 'is-active' if active_tab == 'members' else '' }}">
-  {% if members %}
-    <ul class="list-tight list-split members-list">
-      {% for m in members %}
-        <li>
-          <span class="who">{{ m.nickname }}</span>
-          {% if session.user_id == m.user_id %}
-            <form method="post"
-                  action="{{ url_for('households_ui.households_leave', household_id=household.id) }}"
-                  class="inline-form">
-              <button type="submit" class="inline-action danger-link">Leave</button>
+  <!-- Pets panel -->
+  <section class="tab-panel {{ 'is-active' if active_tab == 'pets' else '' }}">
+    {% if pets %}
+      <ul class="list-tight list-split pets-list">
+        {% for p in pets %}
+          <li>
+            <a
+              class="name"
+              href="{{ url_for('pets_ui.pets_show', pet_id=p.id) }}"
+            >
+              {{ p.name }}
+            </a>
+            <form
+              method="post"
+              action="{{ url_for('pets_ui.pets_delete', household_id=household.id, pet_id=p.id) }}"
+              class="inline-form"
+            >
+              <button type="submit" class="inline-action danger-link">
+                Delete
+              </button>
             </form>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p><em>No members yet.</em></p>
-  {% endif %}
-</section>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p><em>No pets yet.</em></p>
+    {% endif %}
+
+    <!-- Add-row sits under the list -->
+    <a
+      class="add-row"
+      href="{{ url_for('pets_ui.pets_new_get', household_id=household.id) }}"
+    >
+      <span class="plus">+</span> Add a pet
+    </a>
+  </section>
+
+  <!-- Members panel -->
+  <section class="tab-panel {{ 'is-active' if active_tab == 'members' else '' }}">
+    {% if members %}
+      <ul class="list-tight list-split members-list">
+        {% for m in members %}
+          <li>
+            <span class="who">{{ m.nickname }}</span>
+            {% if session.user_id == m.user_id %}
+              <form
+                method="post"
+                action="{{ url_for('households_ui.households_leave', household_id=household.id) }}"
+                class="inline-form"
+              >
+                <button type="submit" class="inline-action danger-link">
+                  Leave
+                </button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p><em>No members yet.</em></p>
+    {% endif %}
+  </section>
 {% endblock %}

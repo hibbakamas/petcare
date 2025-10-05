@@ -1,37 +1,51 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}Households · PetCare{% endblock %}
 
 {% block content %}
-<h2 class="welcome-title">Welcome{% if session.get('username') %}, {{ session.get('username') }}{% endif %}!</h2>
+  <h2 class="welcome-title">
+    Welcome{% if session.get("username") %}, {{ session.get("username") }}{% endif %}!
+  </h2>
 
-<section class="grid">
-  <article>
-    <h3>Create a household</h3>
-    <p>Start a new household and share the join code.</p>
-    <a href="{{ url_for('households_ui.households_new_get') }}" role="button">Create Household</a>
-  </article>
+  <section class="grid">
+    <article>
+      <h3>Create a household</h3>
+      <p>Start a new household and share the join code.</p>
+      <a href="{{ url_for('households_ui.households_new_get') }}" role="button">
+        Create Household
+      </a>
+    </article>
 
-  <article>
-    <h3>Join a household</h3>
-    <p>Have a code? Join an existing household.</p>
-    <a href="{{ url_for('households_ui.join_get') }}" role="button" class="secondary">Join Household</a>
-  </article>
-</section>
+    <article>
+      <h3>Join a household</h3>
+      <p>Have a code? Join an existing household.</p>
+      <a
+        href="{{ url_for('households_ui.join_get') }}"
+        role="button"
+        class="secondary"
+      >
+        Join Household
+      </a>
+    </article>
+  </section>
 
-<section>
-  <h3>Your households</h3>
-  {% if memberships %}
-    <ul class="no-bullets">
-      {% for m in memberships %}
-        <li>
-          <a href="{{ url_for('households_ui.household_dashboard', household_id=m.household.id) }}" class="household-link">
-            <span>{{ m.household.name }}</span>
-          </a> as {{ m.nickname }}
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p><em>No households yet.</em></p>
-  {% endif %}
-</section>
+  <section>
+    <h3>Your households</h3>
+    {% if memberships %}
+      <ul class="no-bullets">
+        {% for m in memberships %}
+          <li>
+            <a
+              href="{{ url_for('households_ui.household_dashboard', household_id=m.household.id) }}"
+              class="household-link"
+            >
+              <span>{{ m.household.name }}</span>
+            </a>
+            as {{ m.nickname }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p><em>No households yet.</em></p>
+    {% endif %}
+  </section>
 {% endblock %}

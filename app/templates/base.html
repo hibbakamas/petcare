@@ -1,36 +1,40 @@
 <!doctype html>
 <html lang="en" data-theme="light">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{% block title %}PetCare{% endblock %}</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}PetCare{% endblock %}</title>
 
-  <!-- minimal CSS framework -->
-  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
-  <!-- custom styles -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-  <!-- header from partial file -->
-  {% include 'partials/header.html' %}
+    <!-- Minimal CSS framework -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
 
-  <!-- flash messages -->
-  <section class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          {% include 'partials/toast.html' with context %}
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-  </section>
+  <body>
+    <!-- Header -->
+    {% include "partials/header.html" %}
 
-  <!-- page-specific content -->
-  <main class="container">
-    {% block content %}{% endblock %}
-  </main>
+    <!-- Flash messages -->
+    <section class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            {% include "partials/toast.html" with context %}
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </section>
 
-  <!-- js -->
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
-</body>
+    <!-- Page-specific content -->
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
 </html>

@@ -1,72 +1,87 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}Profile · PetCare{% endblock %}
+
 {% block content %}
+  <div class="profile-page">
+    <h1 class="profile-title">Profile</h1>
 
-<div class="profile-page">
-  <h1 class="profile-title">Profile</h1>
+    <!-- Account -->
+    <section class="card">
+      <h2 class="section-title">Account</h2>
 
-  <!-- Account -->
-  <section class="card">
-    <h2 class="section-title">Account</h2>
-    <form method="post" action="{{ url_for('users_ui.profile_update_username') }}">
-      <label>Username
-        <input name="username" value="{{ user.username }}" required>
-      </label>
-      {% if username_error %}
-        <p class="error">{{ username_error }}</p>
-      {% endif %}
-      <div class="row-actions">
-        <button type="submit">Save Username</button>
-      </div>
-    </form>
-  </section>
+      <form
+        method="post"
+        action="{{ url_for('users_ui.profile_update_username') }}"
+      >
+        <label>
+          Username
+          <input name="username" value="{{ user.username }}" required />
+        </label>
 
-  <!-- Household nicknames -->
-  <section>
-    <h2 class="section-title">Household nicknames</h2>
+        {% if username_error %}
+          <p class="error">{{ username_error }}</p>
+        {% endif %}
 
-    {% if memberships %}
-      <div class="household-grid">
-        {% for m in memberships %}
-          <article class="household-card">
-            <div class="card-head">
-              <h3 class="household-name">{{ m.household.name }}</h3>
-              <a class="button-ghost small"
-                 href="{{ url_for('households_ui.household_dashboard', household_id=m.household_id) }}">
-                Open
-              </a>
-            </div>
+        <div class="row-actions">
+          <button type="submit">Save Username</button>
+        </div>
+      </form>
+    </section>
 
-            <form method="post"
-                  action="{{ url_for('users_ui.profile_update_nickname', household_id=m.household_id) }}">
-              <label>Nickname in this household
-                <input name="nickname" value="{{ m.nickname }}" required>
-              </label>
+    <!-- Household nicknames -->
+    <section>
+      <h2 class="section-title">Household nicknames</h2>
 
-              {% if nickname_errors and nickname_errors.get(m.household_id) %}
-                <p class="error">{{ nickname_errors.get(m.household_id) }}</p>
-              {% endif %}
-
-              <div class="row-actions">
-                <button type="submit">Save Nickname</button>
+      {% if memberships %}
+        <div class="household-grid">
+          {% for m in memberships %}
+            <article class="household-card">
+              <div class="card-head">
+                <h3 class="household-name">{{ m.household.name }}</h3>
+                <a
+                  class="button-ghost small"
+                  href="{{ url_for('households_ui.household_dashboard', household_id=m.household_id) }}"
+                >
+                  Open
+                </a>
               </div>
-            </form>
-          </article>
-        {% endfor %}
+
+              <form
+                method="post"
+                action="{{ url_for('users_ui.profile_update_nickname', household_id=m.household_id) }}"
+              >
+                <label>
+                  Nickname in this household
+                  <input name="nickname" value="{{ m.nickname }}" required />
+                </label>
+
+                {% if nickname_errors and nickname_errors.get(m.household_id) %}
+                  <p class="error">
+                    {{ nickname_errors.get(m.household_id) }}
+                  </p>
+                {% endif %}
+
+                <div class="row-actions">
+                  <button type="submit">Save Nickname</button>
+                </div>
+              </form>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p><em>You’re not in any households yet.</em></p>
+      {% endif %}
+    </section>
+
+    <!-- Session -->
+    <section class="card">
+      <h2 class="section-title">Session</h2>
+      <p>Logged in as <strong>{{ user.username }}</strong></p>
+      <div class="row-actions">
+        <a href="{{ url_for('auth_ui.logout_get') }}" class="btn-danger">
+          Logout
+        </a>
       </div>
-    {% else %}
-      <p><em>You’re not in any households yet.</em></p>
-    {% endif %}
-  </section>
-
-  <!-- Session -->
-  <section class="card">
-    <h2 class="section-title">Session</h2>
-    <p>Logged in as <strong>{{ user.username }}</strong></p>
-    <div class="row-actions">
-      <a href="{{ url_for('auth_ui.logout_get') }}" class="btn-danger">Logout</a>
-    </div>
-  </section>
-</div>
-
+    </section>
+  </div>
 {% endblock %}
