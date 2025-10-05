@@ -1,17 +1,20 @@
-# DB connection and migration
+"""Database setup: SQLAlchemy, Migrations, and SQLite FK enforcement."""
 
-from flask_sqlalchemy import SQLAlchemy
+import sqlite3
+from typing import Any
+
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-import sqlite3
 
 db = SQLAlchemy()
 migrate = Migrate()
 
-# enable foreign keys for sqlite
+
+# Enable foreign key constraints on SQLite connections.
 @event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
+def set_sqlite_pragma(dbapi_connection: Any, connection_record: Any) -> None:
     if isinstance(dbapi_connection, sqlite3.Connection):
         cur = dbapi_connection.cursor()
         cur.execute("PRAGMA foreign_keys=ON;")

@@ -1,14 +1,20 @@
-from tests.common import find_api_route, fill_route_params, extract_int
+"""Pets API tests: household-nested create/list and pet CRUD with membership rules."""
+
 import re
 from datetime import datetime
 
+from tests.common import extract_int, fill_route_params, find_api_route
+from app.models import Household, HouseholdMember, Pet, Users, db
+
+
+# ---------- dynamic API helpers ----------
 
 def _login(client, app, username="pets_api_user", password="pw"):
     signup = find_api_route(app, ["signup"], "POST") or find_api_route(app, ["users"], "POST")
-    login  = find_api_route(app, ["login"],  "POST")
+    login = find_api_route(app, ["login"], "POST")
     assert signup and login
     client.post(signup, json={"username": username, "password": password})
-    client.post(login,  json={"username": username, "password": password})
+    client.post(login, json={"username": username, "password": password})
 
 
 def _make_household(client, app, name="PetHome"):
@@ -49,7 +55,7 @@ def test_pets_create_show_delete_and_validation(client, app):
     post = find_api_route(app, ["pets"], "POST")
     assert post
 
-    # --- validation: missing name (APIs differ: some 400/422, some still create) ---
+    # Missing name (APIs differ: some 400/422, some still create)
     try:
         purl = fill_route_params(post, household_id=hid)
     except KeyError:
@@ -61,13 +67,13 @@ def test_pets_create_show_delete_and_validation(client, app):
         assert isinstance(pet, dict)
         assert ("id" in pet) or ("pet_id" in pet)
 
-    # --- create ok ---
+    # Create OK
     r = client.post(purl, json={"name": "Rory", "household_id": hid})
     assert r.status_code in (200, 201)
     pet = r.get_json(silent=True) or {}
     pid = extract_int(pet, ("id", "pet_id"))
 
-    # --- optional GET show/list ---
+    # Optional GET show/list
     get = find_api_route(app, ["pets"], "GET")
     if get:
         if "<" in get:
@@ -84,12 +90,12 @@ def test_pets_create_show_delete_and_validation(client, app):
             assert rg.status_code == 200
             assert isinstance(rg.get_json(silent=True), (list, dict))
 
-        # --- invalid id only if a param route exists ---
+        # Invalid id only if a param route exists
         if "<" in get and pid is not None:
             try:
                 bad_gurl = fill_route_params(get, pet_id=999999, household_id=hid)
             except KeyError:
-                bad_gurl = get  # fall back; won’t use invalid-id when we can’t fill params
+                bad_gurl = get
             rbad = client.get(bad_gurl)
             # Some APIs return 200 with {} or [] for "missing"
             assert rbad.status_code in (200, 404, 400)
@@ -97,7 +103,7 @@ def test_pets_create_show_delete_and_validation(client, app):
                 payload = rbad.get_json(silent=True)
                 assert isinstance(payload, (dict, list))
 
-    # --- delete then delete again (idempotency / 404 path) ---
+    # Delete then delete again (idempotency / 404 path)
     delete = find_api_route(app, ["pets"], "DELETE")
     if delete:
         try:
@@ -111,14 +117,14 @@ def test_pets_create_show_delete_and_validation(client, app):
 
 
 def test_pets_more_validation_and_show_404(client, app):
-    # Extra coverage: “missing household_id” tolerance and 404/200 variants on show
+    # “Missing household_id” tolerance and 404/200 variants on show
     _login(client, app)
     hid = _make_household(client, app)
 
     pets_post = find_api_route(app, ["pets"], "POST")
     assert pets_post
 
-    # --- missing household_id: allow APIs that infer it from path or ignore it ---
+    # Missing household_id: allow APIs that infer it from path or ignore it
     try:
         post_url = fill_route_params(pets_post, household_id=hid)
     except KeyError:
@@ -130,19 +136,19 @@ def test_pets_more_validation_and_show_404(client, app):
         assert isinstance(pet, dict)
         assert ("id" in pet) or ("pet_id" in pet)
 
-    # --- create ok ---
+    # Create OK
     r = client.post(post_url, json={"name": "WithHH", "household_id": hid})
     assert r.status_code in (200, 201)
     pet = r.get_json(silent=True) or {}
     pid = extract_int(pet, ("id", "pet_id"))
 
-    # --- invalid show only when GET route has params ---
+    # Invalid show only when GET route has params
     pets_get = find_api_route(app, ["pets"], "GET")
     if pets_get and "<" in pets_get:
         try:
             bad = fill_route_params(pets_get, pet_id=999999, household_id=hid)
         except KeyError:
-            bad = pets_get  # can’t craft a bad id -> skip meaningful assertion
+            bad = pets_get
         rr = client.get(bad)
         # Accept APIs that return 200 with {} / [] for not found
         assert rr.status_code in (404, 400, 200)
@@ -150,27 +156,24 @@ def test_pets_more_validation_and_show_404(client, app):
             payload = rr.get_json(silent=True)
             assert isinstance(payload, (dict, list))
 
-# tests/api/test_pets_api_strict.py
 
-from app.models import db, Users, Household, HouseholdMember, Pet
-
-# ---------- Helpers (DB-level, minimal, reliable) ----------
+# ---------- strict tests (db-level helpers) ----------
 
 def _mk_user(app, username="pets_user"):
     with app.app_context():
-        u = Users(username=username, password_hash="x")  # simple dummy hash
+        u = Users(username=username, password_hash="x")
         db.session.add(u)
         db.session.commit()
         return u.id
 
+
 def _login_as(client, user_id: int):
-    # Your @login_required_api checks session["user_id"]
     with client.session_transaction() as s:
         s["user_id"] = user_id
 
+
 def _mk_household(app, name="HH", join_code=None):
     if join_code is None:
-        # keep it unique to avoid IntegrityError if DB persists between tests
         import random, string
         join_code = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
     with app.app_context():
@@ -179,8 +182,8 @@ def _mk_household(app, name="HH", join_code=None):
         db.session.commit()
         return h.id
 
+
 def _add_member(app, hid, uid, nickname=None):
-    from app.models import db, HouseholdMember
     if nickname is None:
         nickname = f"user{uid}_hh{hid}"
     with app.app_context():
@@ -188,12 +191,14 @@ def _add_member(app, hid, uid, nickname=None):
         db.session.add(m)
         db.session.commit()
 
+
 def _mk_pet(app, hid, name="Milo"):
     with app.app_context():
         p = Pet(household_id=hid, name=name)
         db.session.add(p)
         db.session.commit()
         return p.id
+
 
 # ---------- CREATE / LIST (household-nested) ----------
 
@@ -210,6 +215,7 @@ def test_create_pet_201_ok(client, app):
     assert body["name"] == "API Pup"
     assert body["household_id"] == hid
 
+
 def test_create_pet_400_missing_name(client, app):
     uid = _mk_user(app)
     hid = _mk_household(app)
@@ -220,11 +226,13 @@ def test_create_pet_400_missing_name(client, app):
     assert r.status_code == 400
     assert "name is required" in r.get_json()["error"]
 
+
 def test_create_pet_404_bad_household(client, app):
     uid = _mk_user(app)
     _login_as(client, uid)
     r = client.post("/api/v1/households/999999/pets", json={"name": "Ghost"})
     assert r.status_code == 404
+
 
 def test_list_pets_403_non_member(client, app):
     uid = _mk_user(app)
@@ -232,6 +240,7 @@ def test_list_pets_403_non_member(client, app):
     _login_as(client, uid)  # not a member
     r = client.get(f"/api/v1/households/{hid}/pets")
     assert r.status_code == 403
+
 
 # ---------- GET / PATCH / DELETE (by pet id) ----------
 
@@ -246,6 +255,7 @@ def test_get_pet_200_member(client, app):
     assert r.status_code == 200
     assert r.get_json()["name"] == "Rory"
 
+
 def test_get_pet_403_not_member(client, app):
     uid = _mk_user(app)
     hid = _mk_household(app)
@@ -254,11 +264,13 @@ def test_get_pet_403_not_member(client, app):
     r = client.get(f"/api/v1/pets/{pid}")
     assert r.status_code == 403
 
+
 def test_get_pet_404_missing(client, app):
     uid = _mk_user(app)
     _login_as(client, uid)
     r = client.get("/api/v1/pets/999999")
     assert r.status_code == 404
+
 
 def test_patch_pet_200_no_change_when_empty_payload(client, app):
     uid = _mk_user(app)
@@ -269,7 +281,8 @@ def test_patch_pet_200_no_change_when_empty_payload(client, app):
 
     r = client.patch(f"/api/v1/pets/{pid}", json={})
     assert r.status_code == 200
-    assert r.get_json()["name"] == "Milo"  # unchanged
+    assert r.get_json()["name"] == "Milo"
+
 
 def test_patch_pet_400_empty_name(client, app):
     uid = _mk_user(app)
@@ -282,6 +295,7 @@ def test_patch_pet_400_empty_name(client, app):
     assert r.status_code == 400
     assert "cannot be empty" in r.get_json()["error"]
 
+
 def test_patch_pet_200_valid_rename(client, app):
     uid = _mk_user(app)
     hid = _mk_household(app)
@@ -292,6 +306,7 @@ def test_patch_pet_200_valid_rename(client, app):
     r = client.patch(f"/api/v1/pets/{pid}", json={"name": "Nala"})
     assert r.status_code == 200
     assert r.get_json()["name"] == "Nala"
+
 
 def test_patch_pet_403_not_member(client, app):
     uid = _mk_user(app)
@@ -311,9 +326,9 @@ def test_delete_pet_204_member(client, app):
 
     r = client.delete(f"/api/v1/pets/{pid}")
     assert r.status_code == 204
-    # second delete should 404
     r2 = client.delete(f"/api/v1/pets/{pid}")
     assert r2.status_code == 404
+
 
 def test_delete_pet_403_not_member(client, app):
     uid = _mk_user(app)
@@ -323,13 +338,17 @@ def test_delete_pet_403_not_member(client, app):
     r = client.delete(f"/api/v1/pets/{pid}")
     assert r.status_code == 403
 
+
+# ---------- localdt filter checks ----------
+
 def test_localdt_none_and_invalid_tz(app):
     f = app.jinja_env.filters["localdt"]
-    assert f(None) == ""  # dt is None branch
-    s = f(datetime(2025, 1, 1, 12, 0), tz_name="Nope/Nowhere")  # fallback tz branch
+    assert f(None) == ""
+    s = f(datetime(2025, 1, 1, 12, 0), tz_name="Nope/Nowhere")
     assert re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$", s)
+
 
 def test_localdt_naive_treated_as_utc(app):
     f = app.jinja_env.filters["localdt"]
-    s = f(datetime(2025, 1, 1, 12, 0))  # naive → treat as UTC
+    s = f(datetime(2025, 1, 1, 12, 0))
     assert re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$", s)

@@ -1,6 +1,8 @@
-# makes "app" a Python package
+"""Flask application package.
 
-# app/__init__.py
-from .app import create_app, app  # re-export factory and the module-level app
+Expose the factory and the module-level app for WSGI/CLI use.
+"""
+
+from .app import app, create_app
 
 __all__ = ["create_app", "app"]

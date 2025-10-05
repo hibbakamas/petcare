@@ -7,28 +7,41 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.mypy_cache/
+.pytype/
+.ruff_cache/
 
-# Environment variables
-.env
-.env.*
-
-# Database (if local only — not the production one)
-instance/
-*.db
-
-# Coverage / testing
+# Pytest / coverage
+.pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
+# If you keep a local pytest config only
 pytest.ini
 
-# IDE / editor stuff
-.vscode/
-.idea/
+# Env files
+.env
+.env.*
+.python-version
 
-# OS files
-.DS_Store
-Thumbs.db
+# Local DB / instance data (keep migrations tracked)
+instance/
+*.db
+*.sqlite
+*.sqlite3
 
 # Logs and cookies
 *.log
 cookies.txt
+
+# Node / frontend (if any sneaks in)
+node_modules/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/

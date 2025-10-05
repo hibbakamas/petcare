@@ -1,48 +1,42 @@
-# app/app.py
-# main entrypoint (factory pattern)
+"""Flask application factory and global error/utility setup."""
+
+from datetime import timezone
+from zoneinfo import ZoneInfo
 
 from flask import Flask, jsonify, render_template
+
 from .config import Config, TestingConfig
 from .db import db, migrate
 from .routes.api import api_blueprints
 from .routes.ui import ui_blueprints
 
-# --- time utilities for local rendering ---
-from datetime import timezone
-from zoneinfo import ZoneInfo
-
 
 def create_app(testing: bool = False):
-    """
-    Application factory.
-    Creates a fresh Flask app, wires config, DB, blueprints,
-    Jinja filters, and JSON error handlers.
+    """Create and configure the Flask application.
+
+    Wires config, database/migrations, blueprints, Jinja filters, and error handlers.
     """
     app = Flask(__name__, template_folder="templates", static_folder="static")
 
-    # choose config
-    if testing:
-        app.config.from_object(TestingConfig)
-    else:
-        app.config.from_object(Config)
+    # Choose configuration
+    app.config.from_object(TestingConfig if testing else Config)
 
-    # init extensions
+    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # register blueprints
+    # Register blueprints
     for bp in api_blueprints:
         app.register_blueprint(bp)
     for bp in ui_blueprints:
         app.register_blueprint(bp)
 
-    # -------- Jinja filter: render datetimes in local timezone --------
+    # ---------- Jinja filter: render datetimes in a local timezone ----------
     @app.template_filter("localdt")
     def localdt(dt, tz_name: str = "Europe/Madrid", fmt: str = "%Y-%m-%d %H:%M"):
-        """
-        Render a datetime in the given IANA timezone (default Europe/Madrid).
-        - If dt is naive, treat it as UTC.
-        - Returns '' for None.
+        """Render a datetime in the given IANA timezone.
+
+        If `dt` is naive, treat it as UTC. Returns '' for None.
         """
         if dt is None:
             return ""
@@ -54,7 +48,7 @@ def create_app(testing: bool = False):
             tz = ZoneInfo("Europe/Madrid")
         return dt.astimezone(tz).strftime(fmt)
 
-    # -------- JSON error handlers --------
+    # --------------------------- JSON error handlers ---------------------------
     @app.errorhandler(404)
     def not_found(e):
         return jsonify(error="Not Found"), 404
@@ -65,8 +59,8 @@ def create_app(testing: bool = False):
 
     @app.errorhandler(403)
     def forbidden(e):
+        # UI: render HTML page for forbidden access
         return render_template("errors/403.html"), 403
-
 
     @app.errorhandler(405)
     def method_not_allowed(e):

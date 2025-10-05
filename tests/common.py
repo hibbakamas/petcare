@@ -1,8 +1,11 @@
+"""Test helpers for discovering API routes, filling URL params, and extracting ids."""
+
 import re
 from typing import Iterable, Optional
 
+
 def find_api_route(app, contains: Iterable[str], method: str) -> Optional[str]:
-    """Return first /api route whose rule contains all substrings and supports method."""
+    """Return the first /api route whose rule contains all substrings and supports method."""
     method = method.upper()
     for rule in app.url_map.iter_rules():
         path = str(rule.rule)
@@ -14,10 +17,12 @@ def find_api_route(app, contains: Iterable[str], method: str) -> Optional[str]:
             return path
     return None
 
+
 _param_re = re.compile(r"<(?:[^:>]+:)?(?P<name>[^>]+)>")
 
+
 def fill_route_params(rule: str, **params) -> str:
-    """Replace <...> params in a rule with provided **params."""
+    """Replace <...> params in a rule with provided **params; raises KeyError on missing."""
     def repl(m):
         name = m.group("name")
         if name not in params:
@@ -25,8 +30,9 @@ def fill_route_params(rule: str, **params) -> str:
         return str(params[name])
     return _param_re.sub(repl, rule)
 
-def extract_int(d, keys=("id","household_id","pet_id","entry_id")) -> Optional[int]:
-    """Try common keys to find an int id in a JSON dict (recurses a little)."""
+
+def extract_int(d, keys=("id", "household_id", "pet_id", "entry_id")) -> Optional[int]:
+    """Find an integer id in a JSON-like dict using common keys; recurses into nested dicts."""
     if not isinstance(d, dict):
         return None
     for k in keys:

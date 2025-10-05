@@ -1,11 +1,16 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session
+"""UI routes for user profile: view profile, update username, update household nickname."""
+
+from flask import Blueprint, redirect, render_template, request, session, url_for
 from sqlalchemy.exc import IntegrityError
-from ...models import db, Users, HouseholdMember
+
+from ...models import HouseholdMember, Users, db
 
 users_ui = Blueprint("users_ui", __name__)
 
+
 @users_ui.get("/profile")
 def profile_get():
+    """Render the profile page with memberships."""
     user_id = session.get("user_id")
     if not user_id:
         return redirect(url_for("auth_ui.login_get"))
@@ -14,8 +19,10 @@ def profile_get():
     memberships = db.session.query(HouseholdMember).filter_by(user_id=user_id).all()
     return render_template("profile.html", user=user, memberships=memberships)
 
+
 @users_ui.post("/profile/username")
 def profile_update_username():
+    """Update the current user's username."""
     user_id = session.get("user_id")
     if not user_id:
         return redirect(url_for("auth_ui.login_get"))
@@ -24,14 +31,28 @@ def profile_update_username():
     if not new_username:
         user = db.session.get(Users, user_id)
         memberships = db.session.query(HouseholdMember).filter_by(user_id=user_id).all()
-        return render_template("profile.html", user=user, memberships=memberships,
-                               username_error="Username cannot be empty.")
+        return render_template(
+            "profile.html",
+            user=user,
+            memberships=memberships,
+            username_error="Username cannot be empty.",
+        )
 
-    if db.session.query(Users).filter(Users.username == new_username, Users.id != user_id).first():
+    # Reject if another user already has this username.
+    taken = (
+        db.session.query(Users)
+        .filter(Users.username == new_username, Users.id != user_id)
+        .first()
+    )
+    if taken:
         user = db.session.get(Users, user_id)
         memberships = db.session.query(HouseholdMember).filter_by(user_id=user_id).all()
-        return render_template("profile.html", user=user, memberships=memberships,
-                               username_error="That username is already taken.")
+        return render_template(
+            "profile.html",
+            user=user,
+            memberships=memberships,
+            username_error="That username is already taken.",
+        )
 
     user = db.session.get(Users, user_id)
     user.username = new_username
@@ -39,8 +60,10 @@ def profile_update_username():
     session["username"] = new_username
     return redirect(url_for("users_ui.profile_get"))
 
+
 @users_ui.post("/households/<int:household_id>/nickname")
-def profile_update_nickname(household_id):
+def profile_update_nickname(household_id: int):
+    """Update the member nickname for a specific household."""
     user_id = session.get("user_id")
     if not user_id:
         return redirect(url_for("auth_ui.login_get"))
@@ -49,10 +72,18 @@ def profile_update_nickname(household_id):
     if not new_nick:
         user = db.session.get(Users, user_id)
         memberships = db.session.query(HouseholdMember).filter_by(user_id=user_id).all()
-        return render_template("profile.html", user=user, memberships=memberships,
-                               nickname_errors={household_id: "Nickname cannot be empty."})
+        return render_template(
+            "profile.html",
+            user=user,
+            memberships=memberships,
+            nickname_errors={household_id: "Nickname cannot be empty."},
+        )
 
-    m = db.session.query(HouseholdMember).filter_by(user_id=user_id, household_id=household_id).first()
+    m = (
+        db.session.query(HouseholdMember)
+        .filter_by(user_id=user_id, household_id=household_id)
+        .first()
+    )
     if not m:
         return redirect(url_for("users_ui.profile_get"))
 
@@ -63,7 +94,13 @@ def profile_update_nickname(household_id):
         db.session.rollback()
         user = db.session.get(Users, user_id)
         memberships = db.session.query(HouseholdMember).filter_by(user_id=user_id).all()
-        return render_template("profile.html", user=user, memberships=memberships,
-                               nickname_errors={household_id: "That nickname is already used in this household."})
+        return render_template(
+            "profile.html",
+            user=user,
+            memberships=memberships,
+            nickname_errors={
+                household_id: "That nickname is already used in this household."
+            },
+        )
 
     return redirect(url_for("users_ui.profile_get"))

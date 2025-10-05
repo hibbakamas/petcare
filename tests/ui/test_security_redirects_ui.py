@@ -1,7 +1,6 @@
-# tests/ui/test_security_redirects_ui.py
+"""UI security: protected pages redirect to /login when logged out."""
 
 def test_protected_pages_redirect_to_login_when_logged_out(client):
-    # all these should 302 to /login when no session user_id
     protected_gets = [
         "/households",
         "/households/new",
