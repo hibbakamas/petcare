@@ -130,12 +130,12 @@ pytest --cov=app
 * The project runs locally with minimal setup (Python + dependencies).
 * All HTML templates and static assets are included.
 * The app can be launched simply by running `flask run` after installation.
-* Tests are reproducible and isolated — they will not affect user data.
+* Tests are reproducible and isolated, they will not affect user data.
 
 
 
 ## Credits
 
-Developed by **Hibba Kamas**
-Bachelor in Computer Science & Artificial Intelligence
-IE University, Fall 2025
+Developed by **Hibba Kamas**  
+Bachelor in Computer Science & Artificial Intelligence  
+IE University, Fall 2025  
