@@ -1,9 +1,9 @@
 """Flask application factory and global error/utility setup."""
 
-from datetime import timezone
-from zoneinfo import ZoneInfo
+import time
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, g, jsonify, render_template, request
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from .config import Config, TestingConfig
 from .db import db, migrate
@@ -11,10 +11,32 @@ from .routes.api import api_blueprints
 from .routes.ui import ui_blueprints
 from .utils.formatters import localdt
 
+# ----------------------- Prometheus metrics -----------------------
+
+REQUEST_COUNT = Counter(
+    "petcare_request_total",
+    "Total HTTP requests",
+    ["method", "endpoint"],
+)
+
+REQUEST_LATENCY = Histogram(
+    "petcare_request_duration_seconds",
+    "HTTP request latency in seconds",
+    ["endpoint"],
+)
+
+ERROR_COUNT = Counter(
+    "petcare_error_total",
+    "Total error responses (5xx)",
+    ["endpoint", "status"],
+)
+
+
 def create_app(testing: bool = False):
     """Create and configure the Flask application.
 
-    Wires config, database/migrations, blueprints, Jinja filters, and error handlers.
+    Wires config, database/migrations, blueprints, Jinja filters, metrics,
+    and error handlers.
     """
     app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -34,9 +56,46 @@ def create_app(testing: bool = False):
     # ---------- Jinja filter: render datetimes in a local timezone ----------
 
     @app.template_filter("localdt")
-    def _jinja_localdt(dt, tz_name="Europe/Madrid", fmt="%Y-%m-%d %H:%M"):
+    def _jinja_localdt(dt, tz_name: str = "Europe/Madrid", fmt: str = "%Y-%m-%d %H:%M"):
         return localdt(dt, tz_name, fmt)
 
+    # --------------------------- Health & metrics ---------------------------
+
+    @app.route("/health")
+    def health():
+        """Basic health check endpoint for monitoring."""
+        return jsonify(status="ok"), 200
+
+    @app.route("/metrics")
+    def metrics():
+        """Expose Prometheus metrics for scraping."""
+        return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
+
+    @app.before_request
+    def _start_timer():
+        """Record start time for latency metrics."""
+        g._start_time = time.perf_counter()
+
+    @app.after_request
+    def _record_metrics(response):
+        """Update request/latency/error Prometheus metrics."""
+        endpoint = request.endpoint or "unknown"
+        method = request.method
+
+        # Count every request
+        REQUEST_COUNT.labels(method=method, endpoint=endpoint).inc()
+
+        # Latency
+        start = getattr(g, "_start_time", None)
+        if start is not None:
+            elapsed = time.perf_counter() - start
+            REQUEST_LATENCY.labels(endpoint=endpoint).observe(elapsed)
+
+        # Errors (server-side)
+        if response.status_code >= 500:
+            ERROR_COUNT.labels(endpoint=endpoint, status=str(response.status_code)).inc()
+
+        return response
 
     # --------------------------- Error handlers ---------------------------
 

@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "petcare"
+    static_configs:
+      - targets:
+          # Adjust port if you run the app on a different one
+          - "localhost:5000"
