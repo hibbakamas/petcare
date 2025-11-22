@@ -10,8 +10,9 @@ from .home_ui import home_ui
 from .households_ui import households_ui
 from .pets_ui import pets_ui
 from .users_ui import users_ui
+from .health_ui import bp as health_ui_bp
 
 # Central list used by app.app:create_app() to register UI routes.
-ui_blueprints = [auth_ui, households_ui, pets_ui, users_ui, home_ui, entries_ui]
+ui_blueprints = [auth_ui, households_ui, pets_ui, users_ui, home_ui, entries_ui, health_ui_bp]
 
 __all__ = ["ui_blueprints"]
