@@ -19,9 +19,19 @@ steps:
     displayName: 'Install dependencies'
 
   - script: |
-      pytest --cov=app --cov-report=term-missing --cov-fail-under=70
+      pytest \
+        --cov=app \
+        --cov-report=term-missing \
+        --cov-report=xml \
+        --cov-fail-under=70
     displayName: 'Run tests with coverage (fail under 70%)'
 
+  # Build step for the app (Docker image)
+  - script: |
+      docker build -t petcare-app .
+    displayName: 'Build Docker image (app build)'
+
+  # Quick syntax sanity check (you can keep or drop this)
   - script: |
       python -m py_compile $(git ls-files '*.py')
-    displayName: 'Build sanity check'
+    displayName: 'Python syntax sanity check'
