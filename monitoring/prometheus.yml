@@ -1,9 +1,13 @@
 global:
-  scrape_interval: 15s
+  scrape_interval: 5s        # how often Prometheus scrapes targets
+  evaluation_interval: 5s    # how often it evaluates rules (none here, but fine)
 
 scrape_configs:
   - job_name: "petcare"
+    metrics_path: /metrics   # your Flask /metrics endpoint
     static_configs:
       - targets:
-          # Adjust port if you run the app on a different one
-          - "localhost:5000"
+          - "host.docker.internal:5000"
+        labels:
+          service: "petcare"
+          env: "dev"
