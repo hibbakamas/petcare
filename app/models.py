@@ -65,6 +65,14 @@ class Pet(db.Model):
         passive_deletes=True,
     )
 
+    def to_dict(self) -> dict:
+        """JSON-ready representation of a Pet."""
+        return {
+            "id": self.id,
+            "household_id": self.household_id,
+            "name": self.name,
+        }
+
 
 class Entry(db.Model):
     """A note/log entry for a pet, authored by a user."""
@@ -85,6 +93,16 @@ class Entry(db.Model):
 
     # Index to make filtering/sorting entries-by-pet fast
     __table_args__ = (db.Index("ix_entries_pet_created", "pet_id", "created_at"),)
+
+    def to_dict(self) -> dict:
+        """JSON-ready representation of an Entry."""
+        return {
+            "id": self.id,
+            "pet_id": self.pet_id,
+            "user_id": self.user_id,
+            "content": self.content,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
 
 
 class HouseholdMember(db.Model):

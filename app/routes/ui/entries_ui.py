@@ -8,11 +8,13 @@ from flask import Blueprint, redirect, render_template, request, session, url_fo
 from sqlalchemy import desc
 
 from ...models import Entry, Pet, db
+from app.utils.auth import login_required_ui
 
 entries_ui = Blueprint("entries_ui", __name__)
 
 
 @entries_ui.post("/pets/<int:pet_id>/entries/new")
+@login_required_ui
 def entries_create(pet_id: int):
     """Create a new entry for a pet; render form errors on the same page."""
     pet = db.session.get(Pet, pet_id)
@@ -43,6 +45,7 @@ def entries_create(pet_id: int):
 
 
 @entries_ui.post("/pets/<int:pet_id>/entries/<int:entry_id>/delete")
+@login_required_ui
 def entries_delete(pet_id: int, entry_id: int):
     """Delete an entry (author-only)."""
     e = db.session.get(Entry, entry_id)
@@ -58,6 +61,7 @@ def entries_delete(pet_id: int, entry_id: int):
 
 
 @entries_ui.get("/pets/<int:pet_id>/entries/<int:entry_id>/edit")
+@login_required_ui
 def entries_edit_get(pet_id: int, entry_id: int):
     """Render the edit form for an entry (author-only)."""
     e = db.session.get(Entry, entry_id)
@@ -71,6 +75,7 @@ def entries_edit_get(pet_id: int, entry_id: int):
 
 
 @entries_ui.post("/pets/<int:pet_id>/entries/<int:entry_id>/edit")
+@login_required_ui
 def entries_edit_post(pet_id: int, entry_id: int):
     """Process the edit form for an entry (author-only)."""
     e = db.session.get(Entry, entry_id)
