@@ -4,3 +4,4 @@ SQLAlchemy>=2.0,<3
 Flask-Migrate>=4.0,<5
 alembic>=1.13,<2
 python-dotenv>=1.0,<2
+prometheus-client>=0.20,<1
