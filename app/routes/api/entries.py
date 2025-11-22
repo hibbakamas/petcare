@@ -1,3 +1,4 @@
+# app/routes/api/entries.py
 """Entries API: create, list, read, update, and delete pet entries (notes/logs).
 
 Session-based auth is required for all endpoints. Responses use a minimal,
@@ -12,6 +13,17 @@ from ...models import Entry, Pet, db
 from .helpers import json_error as _json_error  # shared JSON error helper
 
 entries_bp = Blueprint("entries", __name__, url_prefix="/api/v1")
+
+
+def _entry_to_dict(e: Entry) -> dict:
+    """Serialize an Entry model into a JSON-ready dict."""
+    return {
+        "id": e.id,
+        "pet_id": e.pet_id,
+        "user_id": e.user_id,
+        "content": e.content,
+        "created_at": e.created_at.isoformat() if e.created_at else None,
+    }
 
 
 @entries_bp.post("/pets/<int:pet_id>/entries")
@@ -40,14 +52,7 @@ def create_entry(pet_id: int):
     db.session.add(e)
     db.session.commit()
 
-    body = {
-        "id": e.id,
-        "pet_id": e.pet_id,
-        "user_id": e.user_id,
-        "content": e.content,
-        "created_at": e.created_at.isoformat() if e.created_at else None,
-    }
-    return body, 201, {"Location": f"/api/v1/entries/{e.id}"}
+    return _entry_to_dict(e), 201, {"Location": f"/api/v1/entries/{e.id}"}
 
 
 @entries_bp.get("/pets/<int:pet_id>/entries")
@@ -62,16 +67,7 @@ def list_entries(pet_id: int):
     Pet.query.get_or_404(pet_id)
 
     rows = Entry.query.filter_by(pet_id=pet_id).order_by(Entry.created_at.desc()).all()
-    return [
-        {
-            "id": e.id,
-            "pet_id": e.pet_id,
-            "user_id": e.user_id,
-            "content": e.content,
-            "created_at": e.created_at.isoformat() if e.created_at else None,
-        }
-        for e in rows
-    ], 200
+    return [_entry_to_dict(e) for e in rows], 200
 
 
 @entries_bp.get("/entries/<int:entry_id>")
@@ -84,13 +80,7 @@ def get_entry(entry_id: int):
         404 if the entry does not exist
     """
     e = Entry.query.get_or_404(entry_id)
-    return {
-        "id": e.id,
-        "pet_id": e.pet_id,
-        "user_id": e.user_id,
-        "content": e.content,
-        "created_at": e.created_at.isoformat() if e.created_at else None,
-    }, 200
+    return _entry_to_dict(e), 200
 
 
 @entries_bp.patch("/entries/<int:entry_id>")
@@ -117,13 +107,7 @@ def patch_entry(entry_id: int):
 
     e.content = content
     db.session.commit()
-    return {
-        "id": e.id,
-        "pet_id": e.pet_id,
-        "user_id": e.user_id,
-        "content": e.content,
-        "created_at": e.created_at.isoformat() if e.created_at else None,
-    }, 200
+    return _entry_to_dict(e), 200
 
 
 @entries_bp.delete("/entries/<int:entry_id>")

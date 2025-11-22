@@ -1,3 +1,4 @@
+# app/routes/api/pets.py
 """Pets API: create, list, read, update, and delete pets within a household.
 
 All endpoints require a session (see @login_required_api). Responses use a minimal,
@@ -38,6 +39,11 @@ def _pet_and_membership(pet_id: int, user_id: int):
     return p, is_mem
 
 
+def _pet_to_dict(p: Pet) -> dict:
+    """Serialize a Pet model into a JSON-ready dict."""
+    return {"id": p.id, "household_id": p.household_id, "name": p.name}
+
+
 @pets_bp.post("/households/<int:household_id>/pets")
 @login_required_api
 def create_pet(household_id: int):
@@ -66,8 +72,7 @@ def create_pet(household_id: int):
     db.session.add(p)
     db.session.commit()
 
-    body = {"id": p.id, "household_id": p.household_id, "name": p.name}
-    return body, 201, {"Location": f"/api/v1/pets/{p.id}"}
+    return _pet_to_dict(p), 201, {"Location": f"/api/v1/pets/{p.id}"}
 
 
 @pets_bp.get("/households/<int:household_id>/pets")
@@ -86,9 +91,7 @@ def list_pets(household_id: int):
         return _json_error("forbidden", 403)
 
     pets = Pet.query.filter_by(household_id=household_id).order_by(Pet.name).all()
-    return [
-        {"id": p.id, "household_id": p.household_id, "name": p.name} for p in pets
-    ], 200
+    return [_pet_to_dict(p) for p in pets], 200
 
 
 @pets_bp.get("/pets/<int:pet_id>")
@@ -107,7 +110,7 @@ def get_pet(pet_id: int):
     if not is_mem:
         return _json_error("forbidden", 403)
 
-    return {"id": p.id, "household_id": p.household_id, "name": p.name}, 200
+    return _pet_to_dict(p), 200
 
 
 @pets_bp.patch("/pets/<int:pet_id>")
@@ -138,7 +141,7 @@ def patch_pet(pet_id: int):
         p.name = new_name
 
     db.session.commit()
-    return {"id": p.id, "household_id": p.household_id, "name": p.name}, 200
+    return _pet_to_dict(p), 200
 
 
 @pets_bp.delete("/pets/<int:pet_id>")
