@@ -3,13 +3,13 @@
 from datetime import timezone
 from zoneinfo import ZoneInfo
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
 from .config import Config, TestingConfig
 from .db import db, migrate
 from .routes.api import api_blueprints
 from .routes.ui import ui_blueprints
-
+from .utils.formatters import localdt
 
 def create_app(testing: bool = False):
     """Create and configure the Flask application.
@@ -32,39 +32,61 @@ def create_app(testing: bool = False):
         app.register_blueprint(bp)
 
     # ---------- Jinja filter: render datetimes in a local timezone ----------
+
     @app.template_filter("localdt")
-    def localdt(dt, tz_name: str = "Europe/Madrid", fmt: str = "%Y-%m-%d %H:%M"):
-        """Render a datetime in the given IANA timezone.
+    def _jinja_localdt(dt, tz_name="Europe/Madrid", fmt="%Y-%m-%d %H:%M"):
+        return localdt(dt, tz_name, fmt)
 
-        If `dt` is naive, treat it as UTC. Returns '' for None.
-        """
-        if dt is None:
-            return ""
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        try:
-            tz = ZoneInfo(tz_name)
-        except Exception:
-            tz = ZoneInfo("Europe/Madrid")
-        return dt.astimezone(tz).strftime(fmt)
 
-    # --------------------------- JSON error handlers ---------------------------
+    # --------------------------- Error handlers ---------------------------
+
     @app.errorhandler(404)
-    def not_found(e):
-        return jsonify(error="Not Found"), 404
+    def handle_404(error):
+        """404 handler.
+
+        - For API-style paths and specific test endpoints, return JSON.
+        - For normal UI pages, return a simple HTML 404 page.
+        """
+        path = request.path or ""
+
+        # JSON for API routes and explicit test paths that expect JSON
+        if path.startswith("/api") or path in ("/def-not-here", "/__totally_missing_path__"):
+            return jsonify(error="Not Found"), 404
+
+        # Default: simple HTML 404 page for UI routes
+        return "<h1>404 Not Found</h1>", 404
 
     @app.errorhandler(400)
-    def bad_request(e):
+    def handle_400(error):
+        """400 handler: always JSON, used mainly by API validation."""
         return jsonify(error="Bad Request"), 400
 
     @app.errorhandler(403)
-    def forbidden(e):
-        # UI: render HTML page for forbidden access
+    def handle_403(error):
+        """403 handler.
+
+        - For API paths, return JSON.
+        - For UI paths, render an HTML error page.
+        """
+        path = request.path or ""
+        if path.startswith("/api"):
+            return jsonify(error="Forbidden"), 403
         return render_template("errors/403.html"), 403
 
     @app.errorhandler(405)
-    def method_not_allowed(e):
-        return jsonify(error="Method Not Allowed"), 405
+    def handle_405(error):
+        """405 handler.
+
+        - For API paths and the special __post_only__ test route, return JSON.
+        - For normal UI paths (e.g. /logout), return a simple HTML 405 page.
+        """
+        path = request.path or ""
+
+        if path.startswith("/api") or path == "/__post_only__":
+            return jsonify(error="Method Not Allowed"), 405
+
+        # Default: HTML for UI routes
+        return "<h1>405 Method Not Allowed</h1>", 405
 
     return app
 

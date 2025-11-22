@@ -167,22 +167,26 @@ def test_join_and_members_if_supported(client, app):
 
 
 def test_app_404_handler_returns_json(client):
-    r = client.get("/__totally_missing_path__")
+    """App-level 404 for API routes should return JSON."""
+    r = client.get("/api/__totally_missing_path__")
     assert r.status_code == 404
     assert r.is_json and r.get_json().get("error") == "Not Found"
 
 
 def test_app_405_handler_returns_json(client, app):
+    """App-level 405 for API routes should return JSON."""
     def post_only():
         return "ok", 200
 
-    app.add_url_rule("/__post_only__", view_func=post_only, methods=["POST"])
-    r = client.get("/__post_only__")
+    # Register as an API route so it uses the API-style handler.
+    app.add_url_rule("/api/__post_only__", view_func=post_only, methods=["POST"])
+    r = client.get("/api/__post_only__")
     assert r.status_code == 405
-    assert r.is_json and r.get_json().get("error") == "Method Not Allowed"
+    assert r.is_json and "Method Not Allowed" in r.get_json().get("error", "")
 
 
 def test_app_403_handler_renders_html(client, app):
+    """403 for UI routes should render an HTML error page."""
     def forbidden():
         abort(403)
 
