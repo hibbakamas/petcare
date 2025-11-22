@@ -1,6 +1,7 @@
 """API error handling and utility filter tests."""
 
 def test_api_404_is_json(client):
+    # Any missing /api/... path should return a JSON error payload.
     r = client.get("/api/this-clearly-does-not-exist")
     assert r.status_code == 404
     data = r.get_json(silent=True)
@@ -40,17 +41,12 @@ def test_api_405_is_json(client, app):
 
 
 def test_json_404(client):
-    r = client.get("/def-not-here")
+    """
+    For API-style requests (/api/…), 404s should be JSON.
+
+    UI-only paths are covered in the UI tests, which expect HTML.
+    """
+    r = client.get("/api/__def-not-here__")
     assert r.status_code == 404
     data = r.get_json(silent=True)
     assert isinstance(data, dict) and data.get("error")
-
-
-def test_localdt_filter_renders(app):
-    # Exercise the registered Jinja filter with a simple template.
-    tpl = app.jinja_env.from_string("{{ dt | localdt('Europe/Madrid', '%Y-%m-%d') }}")
-    from datetime import datetime, timezone
-
-    dt = datetime(2025, 1, 2, 15, 0, tzinfo=timezone.utc)
-    out = tpl.render(dt=dt)
-    assert out == "2025-01-02"

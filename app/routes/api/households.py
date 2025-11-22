@@ -1,26 +1,20 @@
+# app/routes/api/households.py
 """Households API: create, show, update, delete, and join.
 
 All endpoints require a session (see @login_required_api). Responses use a minimal,
 consistent JSON shape and standard HTTP status codes.
 """
 
-import random
-
 from flask import Blueprint, request, session
 from sqlalchemy.exc import IntegrityError
 
 from app.utils.auth import login_required_api
+from app.utils.join_code import gen_join_code
 
 from ...models import Household, HouseholdMember, Users, db
 from .helpers import json_error as _json_error  # shared JSON error helper
 
 households_bp = Blueprint("households", __name__, url_prefix="/api/v1/households")
-
-
-def _gen_code(n: int = 6) -> str:
-    """Generate a readable join code (no ambiguous chars)."""
-    alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-    return "".join(random.choice(alphabet) for _ in range(n))
 
 
 def _require_membership(household_id: int):
@@ -65,9 +59,9 @@ def create_household():
         return _json_error("name is required", 400)
 
     # Generate a unique join_code server-side.
-    code = _gen_code()
+    code = gen_join_code()
     while Household.query.filter_by(join_code=code).first():
-        code = _gen_code()
+        code = gen_join_code()
 
     h = Household(name=name, join_code=code)
     db.session.add(h)

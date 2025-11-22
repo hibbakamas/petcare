@@ -6,17 +6,20 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from sqlalchemy import desc
 
 from ...models import Entry, Pet, db
+from app.utils.auth import login_required_ui
 
 pets_ui = Blueprint("pets_ui", __name__)
 
 
 @pets_ui.get("/households/<int:household_id>/pets/new")
+@login_required_ui
 def pets_new_get(household_id: int):
     """Render the new-pet form."""
     return render_template("pets_new.html", household_id=household_id)
 
 
 @pets_ui.post("/households/<int:household_id>/pets/new")
+@login_required_ui
 def pets_new_post(household_id: int):
     """Create a new pet in the given household."""
     name = (request.form.get("name", "")).strip()
@@ -34,6 +37,7 @@ def pets_new_post(household_id: int):
 
 
 @pets_ui.post("/households/<int:household_id>/pets/<int:pet_id>/delete")
+@login_required_ui
 def pets_delete(household_id: int, pet_id: int):
     """Delete a pet if it belongs to the specified household."""
     p = db.session.get(Pet, pet_id)
@@ -48,6 +52,7 @@ def pets_delete(household_id: int, pet_id: int):
 
 
 @pets_ui.get("/pets/<int:pet_id>")
+@login_required_ui
 def pets_show(pet_id: int):
     """Show a pet detail page with entries filtered by range."""
     pet = db.session.get(Pet, pet_id)

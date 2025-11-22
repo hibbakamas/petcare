@@ -40,14 +40,7 @@ def create_entry(pet_id: int):
     db.session.add(e)
     db.session.commit()
 
-    body = {
-        "id": e.id,
-        "pet_id": e.pet_id,
-        "user_id": e.user_id,
-        "content": e.content,
-        "created_at": e.created_at.isoformat() if e.created_at else None,
-    }
-    return body, 201, {"Location": f"/api/v1/entries/{e.id}"}
+    return e.to_dict(), 201, {"Location": f"/api/v1/entries/{e.id}"}
 
 
 @entries_bp.get("/pets/<int:pet_id>/entries")
@@ -62,16 +55,7 @@ def list_entries(pet_id: int):
     Pet.query.get_or_404(pet_id)
 
     rows = Entry.query.filter_by(pet_id=pet_id).order_by(Entry.created_at.desc()).all()
-    return [
-        {
-            "id": e.id,
-            "pet_id": e.pet_id,
-            "user_id": e.user_id,
-            "content": e.content,
-            "created_at": e.created_at.isoformat() if e.created_at else None,
-        }
-        for e in rows
-    ], 200
+    return [e.to_dict() for e in rows], 200
 
 
 @entries_bp.get("/entries/<int:entry_id>")
@@ -84,13 +68,7 @@ def get_entry(entry_id: int):
         404 if the entry does not exist
     """
     e = Entry.query.get_or_404(entry_id)
-    return {
-        "id": e.id,
-        "pet_id": e.pet_id,
-        "user_id": e.user_id,
-        "content": e.content,
-        "created_at": e.created_at.isoformat() if e.created_at else None,
-    }, 200
+    return e.to_dict(), 200
 
 
 @entries_bp.patch("/entries/<int:entry_id>")
@@ -117,13 +95,7 @@ def patch_entry(entry_id: int):
 
     e.content = content
     db.session.commit()
-    return {
-        "id": e.id,
-        "pet_id": e.pet_id,
-        "user_id": e.user_id,
-        "content": e.content,
-        "created_at": e.created_at.isoformat() if e.created_at else None,
-    }, 200
+    return e.to_dict(), 200
 
 
 @entries_bp.delete("/entries/<int:entry_id>")

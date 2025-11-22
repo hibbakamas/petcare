@@ -4,28 +4,26 @@ from flask import Blueprint, redirect, render_template, request, session, url_fo
 from sqlalchemy.exc import IntegrityError
 
 from ...models import HouseholdMember, Users, db
+from app.utils.auth import login_required_ui
 
 users_ui = Blueprint("users_ui", __name__)
 
 
 @users_ui.get("/profile")
+@login_required_ui
 def profile_get():
     """Render the profile page with memberships."""
-    user_id = session.get("user_id")
-    if not user_id:
-        return redirect(url_for("auth_ui.login_get"))
-
+    user_id = session["user_id"]
     user = db.session.get(Users, user_id)
     memberships = db.session.query(HouseholdMember).filter_by(user_id=user_id).all()
     return render_template("profile.html", user=user, memberships=memberships)
 
 
 @users_ui.post("/profile/username")
+@login_required_ui
 def profile_update_username():
     """Update the current user's username."""
-    user_id = session.get("user_id")
-    if not user_id:
-        return redirect(url_for("auth_ui.login_get"))
+    user_id = session["user_id"]
 
     new_username = (request.form.get("username") or "").strip()
     if not new_username:
@@ -62,11 +60,10 @@ def profile_update_username():
 
 
 @users_ui.post("/households/<int:household_id>/nickname")
+@login_required_ui
 def profile_update_nickname(household_id: int):
     """Update the member nickname for a specific household."""
-    user_id = session.get("user_id")
-    if not user_id:
-        return redirect(url_for("auth_ui.login_get"))
+    user_id = session["user_id"]
 
     new_nick = (request.form.get("nickname") or "").strip()
     if not new_nick:

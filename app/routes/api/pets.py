@@ -66,8 +66,7 @@ def create_pet(household_id: int):
     db.session.add(p)
     db.session.commit()
 
-    body = {"id": p.id, "household_id": p.household_id, "name": p.name}
-    return body, 201, {"Location": f"/api/v1/pets/{p.id}"}
+    return p.to_dict(), 201, {"Location": f"/api/v1/pets/{p.id}"}
 
 
 @pets_bp.get("/households/<int:household_id>/pets")
@@ -86,9 +85,7 @@ def list_pets(household_id: int):
         return _json_error("forbidden", 403)
 
     pets = Pet.query.filter_by(household_id=household_id).order_by(Pet.name).all()
-    return [
-        {"id": p.id, "household_id": p.household_id, "name": p.name} for p in pets
-    ], 200
+    return [p.to_dict() for p in pets], 200
 
 
 @pets_bp.get("/pets/<int:pet_id>")
@@ -107,7 +104,7 @@ def get_pet(pet_id: int):
     if not is_mem:
         return _json_error("forbidden", 403)
 
-    return {"id": p.id, "household_id": p.household_id, "name": p.name}, 200
+    return p.to_dict(), 200
 
 
 @pets_bp.patch("/pets/<int:pet_id>")
@@ -138,7 +135,7 @@ def patch_pet(pet_id: int):
         p.name = new_name
 
     db.session.commit()
-    return {"id": p.id, "household_id": p.household_id, "name": p.name}, 200
+    return p.to_dict(), 200
 
 
 @pets_bp.delete("/pets/<int:pet_id>")
