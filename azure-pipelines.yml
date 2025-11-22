@@ -7,31 +7,64 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.12'
-    displayName: 'Set up Python'
+stages:
+  # ----------------- CI: build + test + coverage -----------------
+  - stage: BuildAndTest
+    displayName: "Build, Test, Coverage"
+    jobs:
+      - job: TestJob
+        displayName: "Run tests and coverage"
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.12'
+            displayName: 'Set up Python 3.12'
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install -r requirements-dev.txt
-    displayName: 'Install dependencies'
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements-dev.txt
+            displayName: 'Install dependencies'
 
-  - script: |
-      pytest \
-        --cov=app \
-        --cov-report=term-missing \
-        --cov-report=xml \
-        --cov-fail-under=70
-    displayName: 'Run tests with coverage (fail under 70%)'
+          - script: |
+              pytest --cov=app --cov-report=term-missing --cov-fail-under=70
+            displayName: 'Run tests with coverage (fail under 70%)'
 
-  # Build step for the app (Docker image)
-  - script: |
-      docker build -t petcare-app .
-    displayName: 'Build Docker image (app build)'
+          - script: |
+              python -m py_compile $(git ls-files '*.py')
+            displayName: 'Build sanity check (compile all Python files)'
 
-  # Quick syntax sanity check (you can keep or drop this)
-  - script: |
-      python -m py_compile $(git ls-files '*.py')
-    displayName: 'Python syntax sanity check'
+  # ----------------- CD: Docker image build + push -----------------
+  - stage: DockerDeploy
+    displayName: "Build & Push Docker Image"
+    dependsOn: BuildAndTest
+    #    Only run deploy stage if:
+    #   - CI (tests) passed AND
+    #   - Branch is exactly main
+    condition: and(
+      succeeded(),
+      eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    )
+
+    jobs:
+      - job: DockerBuildPush
+        displayName: "Build and push Docker image to Docker Hub"
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.12'
+            displayName: 'Set up Python (for potential build steps)'
+
+          - script: |
+              echo "Logging in to Docker Hub..."
+              echo "$(DOCKERHUB_TOKEN)" | docker login -u "$(DOCKERHUB_USERNAME)" --password-stdin
+
+              IMAGE_NAME="$(DOCKERHUB_USERNAME)/petcare"
+              TAG="$(Build.BuildId)"
+
+              echo "Building image: ${IMAGE_NAME}:${TAG}"
+              docker build -t "${IMAGE_NAME}:${TAG}" -t "${IMAGE_NAME}:latest" .
+
+              echo "Pushing image tags..."
+              docker push "${IMAGE_NAME}:${TAG}"
+              docker push "${IMAGE_NAME}:latest"
+            displayName: "Docker build & push"
