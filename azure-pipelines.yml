@@ -37,34 +37,24 @@ stages:
   - stage: DockerDeploy
     displayName: "Build & Push Docker Image"
     dependsOn: BuildAndTest
-    #    Only run deploy stage if:
-    #   - CI (tests) passed AND
-    #   - Branch is exactly main
-    condition: and(
-      succeeded(),
-      eq(variables['Build.SourceBranch'], 'refs/heads/main')
-    )
+    # Only run this stage on main, after tests pass
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
 
     jobs:
-      - job: DockerBuildPush
-        displayName: "Build and push Docker image to Docker Hub"
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.12'
-            displayName: 'Set up Python (for potential build steps)'
+    - job: DockerBuildPush
+      displayName: "Build and push Docker image to Docker Hub"
+      steps:
+      - script: |
+          echo "Logging in to Docker Hub..."
+          echo "$(DOCKERHUB_TOKEN)" | docker login -u "$(DOCKERHUB_USERNAME)" --password-stdin
 
-          - script: |
-              echo "Logging in to Docker Hub..."
-              echo "$(DOCKERHUB_TOKEN)" | docker login -u "$(DOCKERHUB_USERNAME)" --password-stdin
+          IMAGE_NAME="$(DOCKERHUB_USERNAME)/petcare"
+          TAG="$(Build.BuildId)"
 
-              IMAGE_NAME="$(DOCKERHUB_USERNAME)/petcare"
-              TAG="$(Build.BuildId)"
+          echo "Building image: ${IMAGE_NAME}:${TAG}"
+          docker build -t "${IMAGE_NAME}:${TAG}" -t "${IMAGE_NAME}:latest" .
 
-              echo "Building image: ${IMAGE_NAME}:${TAG}"
-              docker build -t "${IMAGE_NAME}:${TAG}" -t "${IMAGE_NAME}:latest" .
-
-              echo "Pushing image tags..."
-              docker push "${IMAGE_NAME}:${TAG}"
-              docker push "${IMAGE_NAME}:latest"
-            displayName: "Docker build & push"
+          echo "Pushing image tags..."
+          docker push "${IMAGE_NAME}:${TAG}"
+          docker push "${IMAGE_NAME}:latest"
+        displayName: "Docker build & push"
