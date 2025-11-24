@@ -87,5 +87,5 @@ jobs:
       - name: Deploy container to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "petcare-flask-app"          
+          app-name: "petcare-web"          
           images: "${{ secrets.DOCKERHUB_USERNAME }}/petcare:latest"
