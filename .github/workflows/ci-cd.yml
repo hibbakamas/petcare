@@ -67,7 +67,7 @@ jobs:
           docker push "${IMAGE_NAME}:${TAG}"
           docker push "${IMAGE_NAME}:latest"
 
-  # ----------------- CD: Deploy image to Azure Web App (uses AZURE_CREDENTIALS) -----------------
+  # ----------------- CD: Deploy image to Azure Web App (using AZURE_CREDENTIALS) -----------------
   deploy:
     name: "Deploy to Azure Web App"
     runs-on: ubuntu-latest
