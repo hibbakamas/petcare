@@ -1,4 +1,4 @@
-"""Database setup: SQLAlchemy, Migrations, and SQLite FK enforcement."""
+"""Database setup: SQLAlchemy, Migrations, and DB-specific tweaks (SQLite FK enforcement)."""
 
 import sqlite3
 from typing import Any

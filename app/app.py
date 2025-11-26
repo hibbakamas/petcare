@@ -47,6 +47,11 @@ def create_app(testing: bool = False):
     db.init_app(app)
     migrate.init_app(app, db)
 
+    # Ensure tables exist when running in non-testing mode (e.g., Azure)
+    if not testing:
+        with app.app_context():
+            db.create_all()
+
     # Register blueprints
     for bp in api_blueprints:
         app.register_blueprint(bp)
