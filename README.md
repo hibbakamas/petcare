@@ -1,27 +1,59 @@
+
+
+
 # PetCare
 
-A **household pet management web application** built with **Flask** and **SQLite**.  
-Users can create or join households, add pets, and record daily or weekly timeline entries for each pet.
+A **household pet management web application** built with **Flask** and **PostgreSQL**, improved using **DevOps practices**, such as automated testing, CI/CD pipelines, containerization, and cloud deployment on **Azure**.
 
+Users can create or join households, add pets, and record notes for each pet, now supported by a full production pipeline and monitoring setup.
 
+---
+
+## Live Deployment
+
+**Azure Web App URL:**
+[https://petcare-web.azurewebsites.net](https://petcare-web.azurewebsites.net)
+
+---
 
 ## Features
-- Create or join a household with a unique join code  
-- Add, edit, and delete pets  
-- Log entries for each pet (feeding, notes, vet visits, etc.)  
-- View members within each household  
-- Update usernames and household nicknames from the Profile page  
-- Minimal, pastel UI built with PicoCSS + custom theme  
 
+* Create or join a household with a unique join code
+* Add, edit, and delete pets
+* Log entries for each pet (feeding, vet visits, etc.)
+* View and manage household members
+* Login, signup, and profile management
+* REST API and UI routes
+* Automated tests (91% coverage)
+* CI/CD pipeline with GitHub Actions
+* Deployed to Azure Web App via Docker and Service Principal
+* Real-time health check (`/health`) and Prometheus metrics (`/metrics`)
 
+---
 
-## Setup Instructions
+## Project Overview
+
+| Category           | Technology                              |
+| ------------------ | --------------------------------------- |
+| **Framework**      | Flask (Python 3.12)                     |
+| **Database**       | PostgreSQL Flexible Server (Azure)      |
+| **ORM**            | SQLAlchemy + Flask-Migrate              |
+| **Testing**        | Pytest + Pytest-Cov                     |
+| **CI/CD**          | GitHub Actions + Docker + Azure Web App |
+| **Monitoring**     | Prometheus metrics, `/health` endpoint  |
+| **Container**      | Docker image hosted on Docker Hub       |
+| **Cloud Provider** | Microsoft Azure                         |
+
+---
+
+## Local Setup Instructions
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/hibbakamas/petcare.git
 cd petcare
-````
+```
 
 ### 2. Create and activate a virtual environment
 
@@ -35,107 +67,165 @@ source .venv/bin/activate
 
 ### 3. Install dependencies
 
-To run the app:
-
 ```bash
 pip install -r requirements.txt
 ```
 
-If you also want to run tests:
+For development & tests:
 
 ```bash
 pip install -r requirements-dev.txt
 ```
 
-### 4. Initialize the database
+---
+
+## Running Tests
+
+To verify functionality and coverage:
 
 ```bash
-flask db upgrade
+pytest --cov=app --cov-report=term-missing
 ```
 
-If migrations do not exist yet:
+All tests use an **in-memory SQLite database**, ensuring isolation and reproducibility.
+
+---
+
+## Running with Docker
+
+### Build the image
 
 ```bash
-flask db init
-flask db migrate
-flask db upgrade
+docker build -t petcare .
 ```
 
-### 5. Run the app
+### Run locally
 
 ```bash
-flask run
+docker run -p 5000:5000 petcare
 ```
 
-Then open your browser at **[http://localhost:5000](http://localhost:5000)**
+Then visit **[http://localhost:5000](http://localhost:5000)**
 
+---
 
+## Deployment (CI/CD)
+
+### GitHub Actions
+
+Every push to `main` triggers the workflow defined in `.github/workflows/ci-cd.yml`.
+
+**Pipeline stages:**
+
+1. Run tests and enforce coverage ≥70%.
+2. Build and push Docker image to Docker Hub.
+3. Deploy automatically to Azure Web App using a Service Principal (`AZURE_CREDENTIALS`).
+
+Secrets used:
+
+* `DOCKERHUB_USERNAME`
+* `DOCKERHUB_TOKEN`
+* `AZURE_CREDENTIALS`
+
+---
+
+## Monitoring and Health Checks
+
+### `/health`
+
+Simple status endpoint confirming app and DB connectivity.
+
+```json
+{"status": "ok"}
+```
+
+### `/metrics`
+
+Exposes Prometheus-formatted metrics for:
+
+* Total request count
+* Request latency
+* Server error rates
+
+Example metrics:
+
+```
+# HELP petcare_request_total Total HTTP requests
+# TYPE petcare_request_total counter
+petcare_request_total{method="GET",endpoint="login"} 5.0
+```
+
+### Prometheus configuration
+
+`monitoring/prometheus.yml`
+
+```yaml
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "petcare"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "host.docker.internal:5000"
+        labels:
+          service: "petcare"
+          env: "dev"
+```
+
+To run locally:
+
+```bash
+docker run -p 9090:9090 -v $(pwd)/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+```
+
+Then open [http://localhost:9090](http://localhost:9090) → see “petcare — UP”.
+
+---
 
 ## Project Structure
 
 ```
 app/
- ├── app.py           # Main entrypoint
- ├── __init__.py      # App factory (create_app)
- ├── models.py        # SQLAlchemy models
- ├── utils.py         # Helper functions
- ├── routes/          # API and UI blueprints
- ├── templates/       # Jinja2 HTML templates
- ├── static/          # styles.css (pastel theme)
- ├── db.py            # Database instance
- └── config.py        # Configuration classes
-migrations/            # Flask-Migrate folder
-tests/                 # Pytest tests
-.env.example           # Example environment variables
-.gitignore             # Ignored files (venv, cache, etc.)
+ ├── app.py                 # Main entrypoint
+ ├── __init__.py            # App factory (create_app)
+ ├── models.py              # SQLAlchemy models
+ ├── db.py                  # DB setup (SQLite/Postgres)
+ ├── config.py              # Configuration classes
+ ├── routes/                # API + UI blueprints
+ ├── templates/             # Jinja2 HTML templates
+ ├── static/                # CSS, JS assets
+ ├── utils/                 # Helpers and formatters
+monitoring/
+ ├── prometheus.yml         # Local Prometheus config
+tests/                      # Unit and integration tests
+.github/workflows/ci-cd.yml    # CI/CD pipeline
+Dockerfile
 requirements.txt
 requirements-dev.txt
 README.md
 ```
 
+---
 
-## Tech Stack
+## Improvements Implemented
 
-* **Flask** — Web framework
-* **SQLite** — Lightweight relational database
-* **SQLAlchemy** — Object-relational mapper
-* **Flask-Migrate** — Database migrations
-* **Jinja2** — Templating engine for HTML pages
-* **Werkzeug** — Used for secure password hashing and utilities
-* **PicoCSS** — Minimal pastel UI framework
-* **Pytest** — Unit testing framework
-* **GitHub** — Version control and project management
+| Category             | Improvements                                                |
+| -------------------- | ----------------------------------------------------------- |
+| **Code Quality**     | Refactored code using SOLID principles, removed code smells |
+| **Testing**          | Achieved 91% coverage using `pytest` and `pytest-cov`       |
+| **CI/CD**            | Automated testing, Docker build, and Azure deployment       |
+| **Containerization** | Created lightweight production image (Python 3.12-slim)     |
+| **Deployment**       | Fully automated GitHub → Azure pipeline                     |
+| **Monitoring**       | `/health` and `/metrics` endpoints + Prometheus config      |
+| **Database**         | Migrated from SQLite to persistent Azure PostgreSQL         |
 
-## Running Tests
-
-To verify functionality:
-
-```bash
-pytest
-```
-
-For coverage:
-
-```bash
-pytest --cov=app
-```
-
-> Tests automatically use an **in-memory SQLite database**
-> (`sqlite:///:memory:`) defined in `tests/conftest.py`,
-> so no setup or external DB is needed.
-
-
-## Notes for Reviewers
-
-* The project runs locally with minimal setup (Python + dependencies).
-* All HTML templates and static assets are included.
-* The app can be launched simply by running `flask run` after installation.
-* Tests are reproducible and isolated, they will not affect user data.
-
-
+---
 
 ## Credits
 
 Developed by **Hibba Kamas**  
 Bachelor in Computer Science & Artificial Intelligence  
-IE University, Fall 2025  
+IE University, Fall 2025
